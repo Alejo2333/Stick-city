@@ -7,6 +7,12 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <title>Stick City</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Patrick+Hand&display=swap"
+    />
     <style>
       :root {
         --paper: #eef2f5;
@@ -71,7 +77,8 @@
         left: var(--ovl, 36%);
         right: 2%;
         top: 19%;
-        bottom: 72px;
+        bottom: auto;
+        max-height: calc(81% - 72px);
         overflow: auto;
         background: rgba(70, 130, 255, 0.92);
         border: 2px solid #1b4fc4;
@@ -305,8 +312,7 @@
       .fab {
         position: fixed;
         right: calc(10px + env(safe-area-inset-right, 0px));
-        top: 50%;
-        transform: translateY(-50%);
+        top: calc(10px + env(safe-area-inset-top, 0px));
         z-index: 5;
         display: flex;
         flex-direction: column;
@@ -326,7 +332,7 @@
         left: 50%;
         bottom: calc(16px + env(safe-area-inset-bottom, 0px));
         transform: translateX(-50%);
-        z-index: 6;
+        z-index: 11;
         max-width: min(92vw, 640px);
         margin: 0;
         padding: 8px 14px;
@@ -345,8 +351,54 @@
           bottom: calc(150px + env(safe-area-inset-bottom, 0px));
         }
       }
+      @media (pointer: coarse) and (orientation: landscape) {
+        #log {
+          bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+          max-width: calc(100vw - 420px);
+          min-width: 200px;
+          font-size: 14px;
+        }
+      }
       body.in #log {
         bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+      }
+      #carb[hidden] {
+        display: none;
+      }
+      .ov .menu .leave {
+        position: sticky;
+        bottom: -14px;
+        grid-column: 1 / -1;
+        background: #bfe0ff;
+        box-shadow: 0 -6px 10px rgba(30, 80, 200, 0.45);
+      }
+      .screen .menu > button:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+      }
+      @media (max-height: 480px) {
+        .ov {
+          top: calc(54px + env(safe-area-inset-top, 0px));
+          max-height: calc(100% - 62px - env(safe-area-inset-top, 0px));
+          padding: 10px 12px;
+        }
+        .ov p {
+          font-size: 12.5px;
+          margin-bottom: 6px;
+        }
+        .ov .menu {
+          gap: 6px;
+        }
+        .ov .menu button {
+          font-size: 11.5px;
+          padding: 5px 8px;
+          min-height: 38px;
+        }
+        .ov .ico {
+          font-size: 20px;
+        }
+        .ov .menu .leave {
+          bottom: -10px;
+        }
       }
       /* Mobile + zoom additions */
       #sa {
@@ -383,8 +435,7 @@
       #zl {
         position: fixed;
         right: calc(66px + env(safe-area-inset-right, 0px));
-        top: 50%;
-        transform: translateY(-50%);
+        top: calc(170px + env(safe-area-inset-top, 0px));
         z-index: 6;
         padding: 4px 10px;
         border-radius: 10px;
@@ -424,12 +475,6 @@
           grid-template-columns: repeat(3, 52px);
           grid-template-rows: repeat(2, 48px);
           gap: 5px;
-        }
-      }
-      @media (max-height: 480px) and (min-width: 561px) {
-        .ov {
-          top: 14%;
-          bottom: 60px;
         }
       }
       @media (max-height: 520px) and (orientation: landscape) {
@@ -733,6 +778,465 @@
         background: #ff9f0a;
         color: #fff;
       }
+      @media (max-height: 480px) {
+        .phw {
+          padding: 4px 0 0;
+        }
+        .phtm {
+          font-size: 28px;
+        }
+        .phg {
+          gap: 8px 4px;
+          padding-top: 6px;
+        }
+        .phg span {
+          width: 40px;
+          height: 40px;
+          font-size: 21px;
+          border-radius: 11px;
+        }
+        .ph {
+          border-radius: 26px;
+          padding: 6px;
+        }
+        .phs {
+          border-radius: 22px;
+        }
+        .phh {
+          height: 18px;
+        }
+      }
+      /* ---- Visual polish: fonts, menus, overlays, controls ---- */
+      :root {
+        --ui: "Fredoka", "Trebuchet MS", Verdana, Geneva, sans-serif;
+        --ease-pop: cubic-bezier(0.2, 0.9, 0.25, 1.25);
+      }
+      .menu button,
+      .ov,
+      .ov p,
+      .screen,
+      .screen p,
+      #log,
+      .pb,
+      .phs,
+      .phg button {
+        font-family: var(--ui);
+      }
+      .screen {
+        isolation: isolate;
+        background:
+          radial-gradient(
+            1100px 560px at 50% -12%,
+            rgba(140, 190, 255, 0.55),
+            transparent 62%
+          ),
+          linear-gradient(180deg, #2c62ea 0%, #1a3b9c 40%, #0a1430 100%);
+      }
+      /* Drifting coloured glows and twinkling stars */
+      .screen::before {
+        content: "";
+        position: fixed;
+        inset: -15%;
+        z-index: -1;
+        pointer-events: none;
+        background:
+          radial-gradient(closest-side, rgba(255, 210, 120, 0.3), transparent)
+            18% 28% / 42% 42% no-repeat,
+          radial-gradient(closest-side, rgba(110, 220, 255, 0.24), transparent)
+            82% 55% / 50% 50% no-repeat,
+          radial-gradient(closest-side, rgba(255, 120, 200, 0.18), transparent)
+            50% 92% / 60% 40% no-repeat,
+          radial-gradient(1.5px 1.5px at 12% 18%, #fff, transparent),
+          radial-gradient(1.5px 1.5px at 33% 9%, #fff, transparent),
+          radial-gradient(1px 1px at 47% 22%, #fff, transparent),
+          radial-gradient(1.5px 1.5px at 68% 12%, #fff, transparent),
+          radial-gradient(1px 1px at 81% 26%, #fff, transparent),
+          radial-gradient(1.5px 1.5px at 92% 8%, #fff, transparent),
+          radial-gradient(1px 1px at 24% 34%, #fff, transparent),
+          radial-gradient(1px 1px at 58% 4%, #fff, transparent);
+        animation: sc-drift 22s ease-in-out infinite alternate;
+      }
+      /* Two parallax city skylines scrolling along the bottom */
+      .screen::after {
+        content: "";
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 200%;
+        height: min(34vh, 260px);
+        z-index: -1;
+        pointer-events: none;
+        background:
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='160' viewBox='0 0 600 160'%3E%3Cg fill='%2306102a'%3E%3Crect x='0' y='70' width='60' height='90'/%3E%3Crect x='66' y='30' width='44' height='130'/%3E%3Crect x='84' y='12' width='4' height='18'/%3E%3Crect x='116' y='92' width='70' height='68'/%3E%3Crect x='192' y='50' width='50' height='110'/%3E%3Crect x='248' y='102' width='40' height='58'/%3E%3Crect x='294' y='22' width='58' height='138'/%3E%3Crect x='321' y='4' width='4' height='18'/%3E%3Crect x='358' y='82' width='64' height='78'/%3E%3Crect x='428' y='56' width='42' height='104'/%3E%3Crect x='476' y='96' width='56' height='64'/%3E%3Crect x='538' y='42' width='62' height='118'/%3E%3C/g%3E%3Cg fill='%23ffd76a' opacity='.7'%3E%3Crect x='74' y='42' width='6' height='8'/%3E%3Crect x='94' y='62' width='6' height='8'/%3E%3Crect x='74' y='86' width='6' height='8'/%3E%3Crect x='204' y='64' width='6' height='8'/%3E%3Crect x='222' y='92' width='6' height='8'/%3E%3Crect x='306' y='36' width='6' height='8'/%3E%3Crect x='330' y='58' width='6' height='8'/%3E%3Crect x='306' y='100' width='6' height='8'/%3E%3Crect x='440' y='70' width='6' height='8'/%3E%3Crect x='452' y='112' width='6' height='8'/%3E%3Crect x='552' y='56' width='6' height='8'/%3E%3Crect x='578' y='88' width='6' height='8'/%3E%3Crect x='14' y='86' width='6' height='8'/%3E%3Crect x='372' y='98' width='6' height='8'/%3E%3C/g%3E%3C/svg%3E")
+            0 100% / 600px 160px repeat-x,
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='200' viewBox='0 0 500 200'%3E%3Cg fill='%23132a6e'%3E%3Crect x='10' y='60' width='70' height='140'/%3E%3Crect x='90' y='100' width='50' height='100'/%3E%3Crect x='150' y='30' width='60' height='170'/%3E%3Crect x='220' y='80' width='80' height='120'/%3E%3Crect x='310' y='50' width='50' height='150'/%3E%3Crect x='370' y='110' width='60' height='90'/%3E%3Crect x='440' y='70' width='55' height='130'/%3E%3C/g%3E%3C/svg%3E")
+            0 100% / 500px 200px repeat-x;
+        opacity: 0.9;
+        animation: sc-pan 90s linear infinite;
+      }
+      @keyframes sc-drift {
+        to {
+          transform: translate3d(4%, -3%, 0) scale(1.06);
+        }
+      }
+      @keyframes sc-pan {
+        to {
+          transform: translate3d(-50%, 0, 0);
+        }
+      }
+      .screen-panel {
+        position: relative;
+        background:
+          linear-gradient(
+            160deg,
+            rgba(255, 255, 255, 0.18),
+            rgba(255, 255, 255, 0.03) 45%
+          ),
+          rgba(9, 18, 46, 0.58);
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        box-shadow:
+          0 30px 80px rgba(0, 0, 0, 0.45),
+          inset 0 1px 0 rgba(255, 255, 255, 0.28);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        animation: sc-panel 0.5s var(--ease-pop) both;
+      }
+      @keyframes sc-panel {
+        from {
+          opacity: 0;
+          transform: translateY(28px) scale(0.94);
+        }
+      }
+      .screen h1 {
+        color: #fff;
+        text-shadow:
+          0 4px 0 #0d2f7a,
+          0 12px 24px rgba(0, 0, 0, 0.4),
+          0 0 36px rgba(140, 200, 255, 0.45);
+        animation: sc-title 0.6s var(--ease-pop) 0.05s both;
+      }
+      /* Long menus (pause, city hub…) go two-up on wide screens. */
+      @media (min-width: 700px) {
+        .screen-panel:has(.menu > button:nth-child(6)) {
+          width: min(780px, 100%);
+        }
+        .screen .menu:has(> button:nth-child(6)) {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @keyframes sc-title {
+        from {
+          opacity: 0;
+          transform: translateY(-18px) scale(0.85) rotate(-3deg);
+        }
+      }
+      .screen p {
+        animation: sc-fade 0.5s ease 0.12s both;
+      }
+      @keyframes sc-fade {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+      }
+      .screen .menu button {
+        position: relative;
+        overflow: hidden;
+        color: #0d2257;
+        border: 0;
+        background: linear-gradient(180deg, #ffffff, #d7e6ff);
+        box-shadow:
+          0 4px 0 #86a8ea,
+          0 12px 22px rgba(3, 10, 26, 0.3);
+        transition:
+          transform 0.16s var(--ease-pop),
+          box-shadow 0.16s ease;
+        animation: sc-btn 0.42s var(--ease-pop) both;
+        animation-delay: calc(var(--i, 0) * 45ms + 140ms);
+      }
+      @keyframes sc-btn {
+        from {
+          opacity: 0;
+          transform: translateY(16px) scale(0.92);
+        }
+      }
+      .screen .menu button::after,
+      .ov .menu button::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(
+          110deg,
+          transparent 35%,
+          rgba(255, 255, 255, 0.75) 50%,
+          transparent 65%
+        );
+        transform: translateX(-130%);
+        transition: transform 0.6s ease;
+      }
+      .screen .menu button:hover:not(:disabled)::after,
+      .ov .menu button:hover:not(:disabled)::after {
+        transform: translateX(130%);
+      }
+      .screen .menu button:hover:not(:disabled) {
+        transform: translateY(-3px);
+        filter: none;
+        box-shadow:
+          0 7px 0 #86a8ea,
+          0 18px 30px rgba(3, 10, 26, 0.38);
+      }
+      .screen .menu button:active:not(:disabled) {
+        transform: translateY(3px);
+        box-shadow:
+          0 1px 0 #86a8ea,
+          0 6px 12px rgba(3, 10, 26, 0.3);
+      }
+      .screen .menu .ico,
+      .ov .menu .ico {
+        flex: none;
+        display: grid;
+        place-items: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        font-size: 26px;
+        background: linear-gradient(135deg, #eef4ff, #b9d0fb);
+        box-shadow:
+          inset 0 -3px 0 rgba(13, 34, 87, 0.12),
+          0 2px 4px rgba(13, 34, 87, 0.15);
+      }
+      .ov .menu .ico {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        font-size: 22px;
+      }
+      .screen .menu button:hover:not(:disabled) .ico,
+      .ov .menu button:hover:not(:disabled) .ico {
+        animation: sc-wiggle 0.5s ease;
+      }
+      @keyframes sc-wiggle {
+        30% {
+          transform: rotate(-12deg) scale(1.15);
+        }
+        60% {
+          transform: rotate(9deg) scale(1.1);
+        }
+      }
+      /* Re-rendering the same page (after a purchase, a toggle…) shouldn't replay the intro. */
+      .still,
+      .still h1,
+      .still p,
+      .still .menu button {
+        animation: none;
+      }
+      /* Building panel */
+      .ov {
+        color: #fff;
+        background:
+          linear-gradient(
+            160deg,
+            rgba(255, 255, 255, 0.2),
+            rgba(255, 255, 255, 0) 40%
+          ),
+          rgba(20, 50, 140, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        box-shadow:
+          0 24px 60px rgba(0, 0, 0, 0.45),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      }
+      .ov p {
+        color: #fff;
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+      }
+      .ov.fresh {
+        animation: sc-ov 0.45s var(--ease-pop) both;
+      }
+      @keyframes sc-ov {
+        from {
+          opacity: 0;
+          transform: translateX(40px) scale(0.96);
+        }
+      }
+      .ov.fresh .menu button {
+        animation: sc-btn 0.38s var(--ease-pop) both;
+        animation-delay: calc(var(--i, 0) * 35ms + 120ms);
+      }
+      .ov .menu button {
+        position: relative;
+        overflow: hidden;
+        color: #0d2257;
+        border: 0;
+        background: linear-gradient(180deg, #ffffff, #d9e7ff);
+        box-shadow:
+          0 3px 0 #7d9de0,
+          0 8px 16px rgba(0, 0, 30, 0.28);
+        transition:
+          transform 0.15s var(--ease-pop),
+          box-shadow 0.15s ease;
+      }
+      .ov .menu button:hover:not(:disabled) {
+        background: linear-gradient(180deg, #ffffff, #e6efff);
+        transform: translateY(-2px);
+        box-shadow:
+          0 5px 0 #7d9de0,
+          0 12px 22px rgba(0, 0, 30, 0.34);
+      }
+      .ov .menu button:active:not(:disabled) {
+        transform: translateY(2px);
+        box-shadow:
+          0 1px 0 #7d9de0,
+          0 4px 8px rgba(0, 0, 30, 0.28);
+      }
+      .ov .menu .leave,
+      .ov .menu .leave:hover:not(:disabled) {
+        background: linear-gradient(180deg, #ffe3e3, #ffbcbc);
+        box-shadow:
+          0 3px 0 #d98080,
+          0 -10px 18px rgba(20, 50, 140, 0.85);
+      }
+      /* Floating controls */
+      .fab button,
+      .dpad button {
+        background:
+          radial-gradient(
+            circle at 30% 25%,
+            rgba(255, 255, 255, 0.38),
+            rgba(255, 255, 255, 0) 55%
+          ),
+          rgba(12, 22, 52, 0.6);
+        border: 1.5px solid rgba(255, 255, 255, 0.5);
+        box-shadow:
+          0 6px 16px rgba(0, 0, 0, 0.35),
+          inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        transition:
+          transform 0.18s var(--ease-pop),
+          background-color 0.15s ease;
+      }
+      .fab button {
+        border-radius: 50%;
+      }
+      .dpad button {
+        border-radius: 16px;
+      }
+      .fab button:hover {
+        transform: scale(1.1);
+      }
+      .fab button:active,
+      .dpad button:active {
+        transform: scale(0.9);
+        background-color: rgba(255, 255, 255, 0.3);
+      }
+      /* Message toast */
+      #log {
+        padding: 10px 18px;
+        border-radius: 16px;
+        font-weight: 500;
+        background: linear-gradient(
+          180deg,
+          rgba(22, 32, 70, 0.92),
+          rgba(8, 12, 32, 0.92)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      }
+      #log.pop {
+        animation: sc-toast 0.4s var(--ease-pop) both;
+      }
+      @keyframes sc-toast {
+        from {
+          opacity: 0;
+          transform: translate(-50%, 16px) scale(0.94);
+        }
+      }
+      /* Door transition */
+      #fade {
+        position: fixed;
+        inset: 0;
+        z-index: 9;
+        pointer-events: none;
+        opacity: 0;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(0, 0, 0, 0.55),
+          #000 70%
+        );
+      }
+      #fade.go {
+        animation: sc-door 0.45s ease-out;
+      }
+      @keyframes sc-door {
+        0% {
+          opacity: 0.95;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+      /* Phone */
+      #phn {
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+      }
+      .ph {
+        background: linear-gradient(145deg, #2c2c32, #0a0a0c);
+        box-shadow:
+          0 24px 60px rgba(0, 0, 0, 0.6),
+          inset 0 0 0 2px #3a3a42;
+        animation-timing-function: var(--ease-pop);
+      }
+      .phg span {
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.5),
+          0 4px 10px rgba(0, 0, 0, 0.25);
+        transition: transform 0.18s var(--ease-pop);
+      }
+      .phg button:hover span {
+        transform: translateY(-2px) scale(1.07);
+      }
+      .phg button:active span {
+        transform: scale(0.88);
+      }
+      .pb {
+        transition:
+          transform 0.12s ease,
+          filter 0.12s ease;
+      }
+      .pb:hover:not(:disabled) {
+        filter: brightness(1.08);
+      }
+      .pb:active:not(:disabled) {
+        transform: scale(0.97);
+      }
+      @media (max-height: 520px) {
+        .screen .menu .ico {
+          width: 36px;
+          height: 36px;
+          font-size: 21px;
+          border-radius: 11px;
+        }
+        .ov .menu .ico {
+          width: 30px;
+          height: 30px;
+          font-size: 18px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .screen::before,
+        .screen::after,
+        .screen-panel,
+        .screen h1,
+        .screen p,
+        .screen .menu button,
+        .ov.fresh,
+        .ov.fresh .menu button,
+        #log.pop,
+        #fade.go,
+        .ph {
+          animation: none;
+        }
+      }
     </style>
   </head>
   <body>
@@ -759,10 +1263,14 @@
         <button id="menub" aria-label="Menu">☰</button>
         <button id="bagb" aria-label="Backpack">🎒</button>
         <button id="phb" aria-label="Phone">📱</button>
+        <button id="carb" aria-label="Park or drive your vehicle" hidden>
+          🅿️
+        </button>
         <button id="zin" aria-label="Zoom in">+</button>
         <button id="zout" aria-label="Zoom out">−</button>
       </div>
       <div id="zl" aria-hidden="true"></div>
+      <div id="fade" aria-hidden="true"></div>
       <div id="phn" hidden></div>
       <div id="sa" aria-hidden="true"></div>
     </main>
@@ -830,6 +1338,32 @@
           talksDone: 0,
           placesVisited: {},
           missionClaimed: {},
+          storyClaims: {},
+          achievementClaims: {},
+          garage: {},
+          vehicle: "",
+          driveDistance: 0,
+          activeHome: "starter",
+          decorSlots: {},
+          houseStyle: "Classic",
+          invites: 0,
+          npcMemory: {},
+          storePurchases: {},
+          festivalVisits: 0,
+          weatherEvents: 0,
+          personalQuest: "",
+          weatherLastEvent: 0,
+          moneyPeak: 100,
+          outfitsOwned: { Blue: 1 },
+          mayor: 0,
+          invitedGuest: "",
+          guestDay: 0,
+          lifetimeRent: 0,
+          lifetimeBusiness: 0,
+          visitedDistricts: {},
+          seasonsSeen: {},
+          businessUpgrades: {},
+          casino: { plays: 0, won: 0, lost: 0, best: 0 },
         };
         var SK = Object.keys(S);
         S.ph = 0;
@@ -842,7 +1376,14 @@
               if (sv[k] !== undefined) S[k] = sv[k];
             });
         } catch (e) {}
+        if (S.vehicle) S.garage[S.vehicle] = 1;
+        S.seasonsSeen[
+          ["Spring", "Summer", "Autumn", "Winter"][
+            Math.floor((S.day - 1) / 15) % 4
+          ]
+        ] = 1;
         function save() {
+          S.moneyPeak = Math.max(S.moneyPeak || 0, S.cash + S.bank);
           try {
             var o = {};
             SK.forEach(function (k) {
@@ -1256,6 +1797,15 @@
             ["Odds", "are odds"],
             "“Welcome to Lucky Stick. The house always wins. Mostly.”",
             [
+              {
+                i: "🎰",
+                t: "Casino floor",
+                tag: "(slots, roulette, rocket, mega wheel…)",
+                fn: function () {
+                  casinoFloor();
+                  return "Good luck.";
+                },
+              },
               {
                 i: "🪙",
                 t: "Coin flip",
@@ -1718,6 +2268,69 @@
             ],
           ],
         ];
+        // Additional real shops and a residential showroom, placed by the city generator.
+        [
+          [
+            "Clothing Boutique",
+            "#bb4289",
+            "#fff0fb",
+            "#844b79",
+            "👕",
+            "Dress your way",
+            "Style is a lifestyle.",
+          ],
+          [
+            "Supermarket",
+            "#43804d",
+            "#ecffe8",
+            "#53815b",
+            "🛒",
+            "Fresh daily",
+            "Welcome! Stock up for the week.",
+          ],
+          [
+            "Furniture Gallery",
+            "#9b643c",
+            "#fff0d8",
+            "#80583a",
+            "🛋️",
+            "Make it home",
+            "Try the new collections.",
+          ],
+          [
+            "Real Estate Office",
+            "#5372ad",
+            "#e3eeff",
+            "#6b7fa0",
+            "🏘️",
+            "Find your place",
+            "A home for every chapter.",
+          ],
+          [
+            "Motor Garage",
+            "#c65f33",
+            "#f7f1dc",
+            "#775747",
+            "🏍️",
+            "Buy · Service",
+            "Every road starts somewhere.",
+          ],
+        ].forEach(function (a) {
+          D.push([
+            0,
+            0,
+            0,
+            a[0],
+            a[1],
+            a[2],
+            a[3],
+            "#e6b98b",
+            "#333",
+            [a[4], a[5]],
+            a[6],
+            [],
+          ]);
+        });
         function cr(c, n) {
           var o = [];
           for (var i = 0; i < c.length - 1; i++) {
@@ -1901,6 +2514,83 @@
           b.px = np.x;
           b.py = np.y;
           B.push(b);
+        });
+        B.forEach(function (b) {
+          if (
+            ["Clothing Boutique", "Supermarket", "Furniture Gallery"].indexOf(
+              b.n,
+            ) >= 0
+          )
+            b.items.push({
+              i: "🛍️",
+              t: "Browse shop",
+              fn: function () {
+                cityStore(b.n);
+                return "Welcome to " + b.n + ".";
+              },
+            });
+          if (b.n === "Real Estate Office")
+            b.items.push({
+              i: "🏘️",
+              t: "Property listings",
+              fn: function () {
+                cityHomes();
+                return "Let's find your next home.";
+              },
+            });
+          if (b.n === "Motor Garage")
+            b.items.push({
+              i: "🏎️",
+              t: "Buy, park or switch vehicles",
+              fn: function () {
+                cityGarage();
+                return "Welcome to the garage.";
+              },
+            });
+          if (b.n === "Home") {
+            b.items.push({
+              i: "🪴",
+              t: "Move furniture and change wallpaper",
+              fn: function () {
+                cityLayout();
+                return "Home decorating.";
+              },
+            });
+            b.items.push({
+              i: "💌",
+              t: "Invite a friend over",
+              fn: function () {
+                cityInvite();
+                return "Who should come over?";
+              },
+            });
+            b.items.push({
+              i: "🏡",
+              t: "Select your home",
+              fn: function () {
+                cityHomes();
+                return "Choose your residence.";
+              },
+            });
+          }
+          if (b.n === "Office")
+            b.items.push({
+              i: "🗳️",
+              t: "Run for Mayor",
+              fn: function () {
+                cityElection();
+                return "Welcome to City Hall.";
+              },
+            });
+          if (b.n === "Cafe")
+            b.items.push({
+              i: "🎪",
+              t: "Community festival",
+              fn: function () {
+                citySeasonalEvent();
+                return "The festival committee welcomes you.";
+              },
+            });
         });
         if (!sv) {
           S.x = RD[0][40].x;
@@ -2536,26 +3226,69 @@
             });
           });
           CARS.forEach(drawCar);
-          TR.forEach(function (t) {
+          var ssn = seasonName();
+          TR.forEach(function (t, ti) {
             if (!vis(t.x, t.y, t.r + 30)) return;
-            var sw = Math.sin(tick * 0.03 + t.ph) * 2;
+            var sw = Math.sin(tick * 0.03 + t.ph) * 2,
+              col =
+                ssn === "Autumn"
+                  ? ["#e2741d", "#d9a21b", "#c8461f", "#e8b53a"][ti % 4]
+                  : t.c;
+            t._d = t._d || {};
+            var dc = t._d[col] || (t._d[col] = shade(col, -0.3));
             g.fillStyle = "rgba(0,0,0,.2)";
             g.beginPath();
             g.ellipse(t.x + 12, t.y + 14, t.r * 0.95, t.r * 0.6, 0, 0, 7);
             g.fill();
             g.fillStyle = "#6b4423";
             g.fillRect(t.x - 5, t.y - 4, 10, 18);
-            g.fillStyle = t.c;
-            g.strokeStyle = "#0c4a17";
+            g.fillStyle = dc;
+            g.beginPath();
+            g.arc(t.x + sw + 3, t.y - 5, t.r, 0, 7);
+            g.fill();
+            g.fillStyle = col;
+            g.strokeStyle = ssn === "Autumn" ? "#6a2a08" : "#0c4a17";
             g.lineWidth = 3;
             g.beginPath();
             g.arc(t.x + sw, t.y - 8, t.r, 0, 7);
             g.fill();
             g.stroke();
-            g.fillStyle = "rgba(255,255,255,.14)";
+            g.fillStyle = dc;
             g.beginPath();
-            g.arc(t.x + sw - t.r * 0.3, t.y - 8 - t.r * 0.3, t.r * 0.5, 0, 7);
+            g.arc(t.x + sw + t.r * 0.35, t.y - 8 + t.r * 0.3, t.r * 0.45, 0, 7);
             g.fill();
+            g.fillStyle = "rgba(255,255,255,.2)";
+            g.beginPath();
+            g.arc(t.x + sw - t.r * 0.3, t.y - 8 - t.r * 0.3, t.r * 0.45, 0, 7);
+            g.fill();
+            if (ssn === "Spring") {
+              g.fillStyle = "#ffc0dc";
+              for (var k = 0; k < 6; k++) {
+                var an = k * 1.05 + ti;
+                g.beginPath();
+                g.arc(
+                  t.x + sw + Math.cos(an) * t.r * 0.6,
+                  t.y - 8 + Math.sin(an) * t.r * 0.6,
+                  3,
+                  0,
+                  7,
+                );
+                g.fill();
+              }
+            } else if (ssn === "Winter") {
+              g.fillStyle = "rgba(255,255,255,.9)";
+              g.beginPath();
+              g.ellipse(
+                t.x + sw - t.r * 0.15,
+                t.y - 8 - t.r * 0.35,
+                t.r * 0.72,
+                t.r * 0.42,
+                0,
+                0,
+                7,
+              );
+              g.fill();
+            }
           });
         }
         function drawPet(n) {
@@ -2725,12 +3458,55 @@
           "Have you tried the nachos?",
           "Careful out there. It is a rectangle jungle.",
         ];
+        var WORKS = [
+            "Office",
+            "Bank",
+            "Hospital",
+            "School",
+            "Cafe",
+            "Supermarket",
+            "Clothing Boutique",
+            "Police Station",
+            "Burger Joint",
+            "Motor Garage",
+          ],
+          FUNS = [
+            "Cafe",
+            "Bar",
+            "Arcade",
+            "Burger Joint",
+            "Gym",
+            "Night Club",
+            "Casino",
+            "Supermarket",
+          ];
+        // Road points near a building, so visitors scatter instead of stacking.
+        function spotNear(b) {
+          if (!b.near)
+            b.near = RS.filter(function (q) {
+              return Math.hypot(q.x - b.dx, q.y - b.dy) < 380;
+            });
+          var q = b.near.length
+            ? b.near[Math.floor(Math.random() * b.near.length)]
+            : { x: b.px, y: b.py };
+          return {
+            x: q.x + (Math.random() - 0.5) * 70,
+            y: q.y + (Math.random() - 0.5) * 70,
+          };
+        }
         var NP = NM.map(function (nm, i) {
           var s0 = RS[Math.floor(Math.random() * RS.length)];
           return {
             name: nm,
             r: i < 3,
             role: ["", "", "", "beg", "job", "job", "shady"][i] || "",
+            // Each resident has their own routine so they spread across town.
+            home: RS[Math.floor(Math.random() * RS.length)],
+            work:
+              ["", "", "", "Corner Store", "Factory", "Factory", "Night Club"][
+                i
+              ] || WORKS[Math.floor(Math.random() * WORKS.length)],
+            fun: FUNS[Math.floor(Math.random() * FUNS.length)],
             x: s0.x + (Math.random() - 0.5) * 60,
             y: s0.y + (Math.random() - 0.5) * 60,
             a: 0,
@@ -2832,6 +3608,41 @@
                 return;
               }
             }
+            if (n.name && !n.cop && !n.amb) {
+              var hour = S.t,
+                schedule =
+                  hour < 7 || hour >= 21
+                    ? "Home"
+                    : hour < 9 || hour >= 17
+                      ? n.fun
+                      : n.work;
+              // Pick a fresh spot when the routine changes; move there while off-screen.
+              if (n.currentPlace !== schedule || !n.dest) {
+                var bd = B.filter(function (b) {
+                  return b.n === schedule;
+                })[0];
+                n.dest =
+                  schedule === "Home" || !bd
+                    ? {
+                        x: n.home.x + (Math.random() - 0.5) * 70,
+                        y: n.home.y + (Math.random() - 0.5) * 70,
+                      }
+                    : spotNear(bd);
+                n.currentPlace = schedule;
+                if (hit(n.dest.x, n.dest.y)) n.dest = null;
+              }
+              if (
+                n.dest &&
+                (tick + NP.indexOf(n) * 37) % 240 === 0 &&
+                Math.hypot(n.x - n.dest.x, n.y - n.dest.y) > 250 &&
+                Math.hypot(n.x - S.x, n.y - S.y) > 450 &&
+                Math.hypot(n.dest.x - S.x, n.dest.y - S.y) > 450
+              ) {
+                n.x = n.dest.x;
+                n.y = n.dest.y;
+                n.ph += 1;
+              }
+            }
             if (--n.t <= 0) {
               n.t = 60 + Math.random() * 120;
               n.a = Math.random() < 0.25 ? null : Math.random() * 6.283;
@@ -2900,11 +3711,15 @@
         function sq() {
           return QS[Math.floor(Math.random() * QS.length)];
         }
-        function talk(n) {
+        // Counted once per conversation, when the player actually picks something.
+        function countTalk(n) {
+          S.npcMemory[n.name] = S.npcMemory[n.name] || {};
+          S.npcMemory[n.name].last = "Spoke on Day " + S.day;
+          S.npcMemory[n.name].times = (S.npcMemory[n.name].times || 0) + 1;
           S.talksDone++;
           if (S.daily.day === S.day) S.daily.talk = (S.daily.talk || 0) + 1;
-          save();
-
+        }
+        function talk(n) {
           n.cool = 600;
           var nm = n.name;
           var it = [
@@ -2918,10 +3733,43 @@
               cha: 1,
               fn: function () {
                 if (n.r) S.lv[nm] = lvl(nm) + 1;
-                return "“" + sq() + "”";
+                return (
+                  "“" +
+                  (S.npcMemory[nm] && S.npcMemory[nm].times > 2
+                    ? "Good to see you again! "
+                    : "") +
+                  sq() +
+                  "”"
+                );
               },
             },
           ];
+          it.push({
+            i: "🤝",
+            t: "Ask about their day",
+            p: "30 min",
+            h: 0.5,
+            fn: function () {
+              var state =
+                S.t < 9
+                  ? "heading to work"
+                  : S.t < 17
+                    ? "at work"
+                    : S.t < 21
+                      ? "relaxing after work"
+                      : "getting ready for bed";
+              var feel =
+                lvl(nm) >= 10
+                  ? "You are one of my favorite neighbors!"
+                  : lvl(nm) >= 3
+                    ? "Nice to see you again."
+                    : "This city is full of surprises.";
+              S.lv[nm] = lvl(nm) + 1;
+              S.npcMemory[nm] = S.npcMemory[nm] || {};
+              S.npcMemory[nm].last = "You asked about their day";
+              return nm + " says: “I am " + state + ". " + feel + "”";
+            },
+          });
           if (n.r) {
             it.push({
               i: "😉",
@@ -3082,6 +3930,7 @@
             skin: n.skin,
             hair: n.hair,
             sign: ["Street"],
+            talk: n,
             dx: S.x,
             dy: S.y - 85,
             items: it,
@@ -3193,10 +4042,15 @@
             }
             f.t++;
             g.globalAlpha = Math.max(0, 1 - f.t / 60);
-            var y = ay - f.o - f.t * 1.2;
-            g.strokeText(f.s, ax, y);
+            var y = ay - f.o - f.t * 1.2,
+              ps = f.t < 10 ? 1 + (10 - f.t) * 0.06 : 1;
+            g.save();
+            g.translate(ax, y);
+            g.scale(ps, ps);
+            g.strokeText(f.s, 0, 0);
             g.fillStyle = f.c;
-            g.fillText(f.s, ax, y);
+            g.fillText(f.s, 0, 0);
+            g.restore();
           });
           g.globalAlpha = 1;
         }
@@ -3276,8 +4130,13 @@
                 b.y > cy + vh
               )
                 return;
-              for (var w = b.x + 16; w < b.x + b.w - 40; w += 56)
+              for (var w = b.x + 16, wi = 0; w < b.x + b.w - 40; w += 56, wi++) {
+                if ((b.x + wi * 37 + S.day * 13) % 5 < 1) continue;
+                g.globalAlpha = 0.3;
+                g.fillRect(w - 6, b.y + b.h + 2, 44, 26);
+                g.globalAlpha = 1;
                 g.fillRect(w, b.y + b.h + 6, 32, 18);
+              }
             });
             g.restore();
           }
@@ -3293,9 +4152,13 @@
           held = {};
           paused = true;
           bp.innerHTML = "";
+          var panel = document.createElement("div");
+          panel.className = "screen-panel";
+          keepStill(bp, panel, "bag");
+          bp.appendChild(panel);
           var ttl = document.createElement("h1");
           ttl.textContent = "🎒 Backpack";
-          bp.appendChild(ttl);
+          panel.appendChild(ttl);
           var h = document.createElement("p");
           h.textContent =
             "Backpack. Fight power: " +
@@ -3305,7 +4168,7 @@
               : " (unarmed)") +
             (S.partner ? ". Partner: " + S.partner : "") +
             ".";
-          bp.appendChild(h);
+          panel.appendChild(h);
           var d = document.createElement("div");
           d.className = "menu";
           var any = 0;
@@ -3345,8 +4208,14 @@
             };
             d.appendChild(b);
           });
-          var x = document.createElement("button");
-          x.textContent = "⬅️ Back to game";
+          var x = document.createElement("button"),
+            xi = document.createElement("span"),
+            xt = document.createElement("span");
+          xi.className = "ico";
+          xi.textContent = "⬅️";
+          xt.textContent = "Back to game";
+          x.appendChild(xi);
+          x.appendChild(xt);
           x.onclick = function () {
             bp.hidden = true;
             paused = false;
@@ -3356,9 +4225,9 @@
             var e = document.createElement("p");
             e.textContent =
               "Nothing yet. Try the Corner Store or the Pawn Shop.";
-            bp.appendChild(e);
+            panel.appendChild(e);
           }
-          bp.appendChild(d);
+          panel.appendChild(d);
           bp.hidden = false;
           var bf = bp.querySelector("button:not(:disabled)");
           if (bf) bf.focus();
@@ -3367,6 +4236,11 @@
         function say(m) {
           var l = document.getElementById("log");
           l.textContent = m;
+          if (m) {
+            l.classList.remove("pop");
+            void l.offsetWidth;
+            l.classList.add("pop");
+          }
           clearTimeout(sayT);
           if (m)
             sayT = setTimeout(function () {
@@ -3754,6 +4628,8 @@
               " · " +
               esc(S.weather) +
               " · " +
+              seasonName() +
+              " · " +
               esc(S.career) +
               '<div style="margin-top:5px">Cash: ' +
               fmtCash(S.cash) +
@@ -3761,6 +4637,7 @@
               S.hap +
               "/100</div></div></div>" +
               [
+                ["story", "📖 Story chapters"],
                 ["missions", "🎯 Missions & rewards"],
                 ["daily", "📅 Daily challenges"],
                 ["career", "🧭 Choose life path"],
@@ -3771,6 +4648,9 @@
                 ["travel", "🗺️ Travel guide & weather"],
                 ["games", "🎲 City minigames"],
                 ["achievements", "🏆 Achievements"],
+                ["shops", "🛍️ Visit shops"],
+                ["neighbors", "👥 Neighbors"],
+                ["festival", "🎪 Seasonal festival"],
               ]
                 .map(function (a) {
                   return pb("hubgo", a[0], a[1]);
@@ -4029,9 +4909,26 @@
           paused = false;
           save();
         }
-        var cityHubFromPhone = false;
+        var cityHubFromPhone = false,
+          cityBackTo = null,
+          CITY_ITEMS = [
+            "Browse shop",
+            "Property listings",
+            "Select your home",
+            "Buy, park or switch vehicles",
+            "Move furniture and change wallpaper",
+            "Invite a friend over",
+            "Run for Mayor",
+            "Community festival",
+            "Casino floor",
+          ];
         PA.hubgo = function (v) {
+          cityBackTo = null;
           var pages = {
+            story: cityStory,
+            shops: cityShops,
+            neighbors: cityNeighborhood,
+            festival: citySeasonalEvent,
             missions: cityMissions,
             daily: cityDaily,
             career: cityCareer,
@@ -4500,6 +5397,576 @@
           });
         }
         // === STICK CITY: EXPANDED LIFE SIM ===
+        // LIFE SIM 2.2: persistent story campaigns, distinct achievements and shops.
+        var STORY = [
+          [
+            "newstart",
+            "Chapter 1 · A fresh start",
+            "Earn your first paycheck, visit 3 places, and meet 2 residents",
+            120,
+            function () {
+              return (
+                S.jobsDone >= 1 &&
+                Object.keys(S.placesVisited).length >= 3 &&
+                S.talksDone >= 2
+              );
+            },
+          ],
+          [
+            "newhome",
+            "Chapter 2 · Home sweet home",
+            "Buy two decorations and invite a resident over",
+            220,
+            function () {
+              return Object.keys(S.furniture).length >= 2 && S.invites >= 1;
+            },
+          ],
+          [
+            "roadtrip",
+            "Chapter 3 · Wheels of fortune",
+            "Own a vehicle and travel 1,500 distance units",
+            300,
+            function () {
+              return (
+                Object.keys(S.garage).length >= 1 && S.driveDistance >= 1500
+              );
+            },
+          ],
+          [
+            "hustler",
+            "Chapter 4 · Your own boss",
+            "Own a business and collect $100 of business revenue",
+            500,
+            function () {
+              return (
+                Object.keys(S.businesses).length >= 1 &&
+                S.lifetimeBusiness >= 100
+              );
+            },
+          ],
+          [
+            "socialite",
+            "Chapter 5 · Heart of the city",
+            "Make a close friend (10 affection) and attend a festival",
+            600,
+            function () {
+              return (
+                Object.keys(S.lv).some(function (n) {
+                  return S.lv[n] >= 10;
+                }) && S.festivalVisits >= 1
+              );
+            },
+          ],
+          [
+            "estate",
+            "Chapter 6 · Real estate empire",
+            "Own an apartment, townhouse, and mansion",
+            1400,
+            function () {
+              return !!S.owns.apartment && !!S.owns.townhouse && !!S.mansion;
+            },
+          ],
+          [
+            "mayor",
+            "Chapter 7 · Become Mayor",
+            "Reach 20 karma, 25 charisma, and campaign at the Office (City Hall)",
+            2000,
+            function () {
+              return !!S.mayor;
+            },
+          ],
+          [
+            "billionaire",
+            "Finale · From broke to billionaire",
+            "Reach $1,000,000,000 total cash and bank",
+            100000,
+            function () {
+              return S.cash + S.bank >= 1000000000;
+            },
+          ],
+        ];
+        var ACHIEVEMENTS = [
+          [
+            "highroller",
+            "High roller",
+            "Win $10,000 on a single casino bet",
+            500,
+            function () {
+              return (S.casino.best || 0) >= 10000;
+            },
+          ],
+          [
+            "neighbor",
+            "Friendly face",
+            "Chat with 10 locals",
+            50,
+            function () {
+              return S.talksDone >= 10;
+            },
+          ],
+          [
+            "collector",
+            "Collector",
+            "Own 6 pieces of furniture",
+            90,
+            function () {
+              return Object.keys(S.furniture).length >= 6;
+            },
+          ],
+          [
+            "style",
+            "Fashion icon",
+            "Buy three outfits",
+            60,
+            function () {
+              return Object.keys(S.outfitsOwned || {}).length >= 3;
+            },
+          ],
+          [
+            "motorhead",
+            "Motorhead",
+            "Collect three vehicles",
+            130,
+            function () {
+              return Object.keys(S.garage).length >= 3;
+            },
+          ],
+          [
+            "boss",
+            "Tycoon",
+            "Own five businesses",
+            250,
+            function () {
+              return Object.keys(S.businesses).length >= 5;
+            },
+          ],
+          [
+            "tourist",
+            "Tourist",
+            "Visit 15 locations",
+            100,
+            function () {
+              return Object.keys(S.placesVisited).length >= 15;
+            },
+          ],
+          [
+            "wealthy",
+            "Six figures",
+            "Accumulate $100,000",
+            250,
+            function () {
+              return S.moneyPeak >= 100000;
+            },
+          ],
+          [
+            "friendship",
+            "Best friends",
+            "Reach affection 20 with a resident",
+            100,
+            function () {
+              return Object.keys(S.lv).some(function (n) {
+                return S.lv[n] >= 20;
+              });
+            },
+          ],
+          [
+            "properties",
+            "Own every home",
+            "Own an apartment, townhouse and mansion",
+            500,
+            function () {
+              return !!S.owns.apartment && !!S.owns.townhouse && !!S.mansion;
+            },
+          ],
+          [
+            "renter",
+            "Landlord",
+            "Collect $500 rent",
+            110,
+            function () {
+              return S.lifetimeRent >= 500;
+            },
+          ],
+          [
+            "seasoned",
+            "Four seasons",
+            "Experience all four seasons",
+            175,
+            function () {
+              return Object.keys(S.seasonsSeen).length >= 4;
+            },
+          ],
+          [
+            "leader",
+            "Mayor",
+            "Win the city's mayoral election",
+            200,
+            function () {
+              return !!S.mayor;
+            },
+          ],
+          [
+            "legend",
+            "Living legend",
+            "Finish all story chapters",
+            2500,
+            function () {
+              return STORY.every(function (q) {
+                return !!S.storyClaims[q[0]];
+              });
+            },
+          ],
+        ];
+        var VEHICLES = [
+          ["bicycle", "Bicycle", 120, 5.3, "🚲"],
+          ["scooter", "Scooter", 480, 7, "🛵"],
+          ["motorcycle", "Motorcycle", 850, 8.5, "🏍️"],
+          ["car", "City car", 1600, 10, "🚙"],
+          ["sportscar", "Sports car", 6000, 13, "🏎️"],
+        ];
+        var SHOP_ITEMS = {
+          "Clothing Boutique": [
+            ["Blue jacket", 90, "Blue"],
+            ["Red jacket", 110, "Red"],
+            ["Green outfit", 95, "Green"],
+            ["Purple outfit", 120, "Purple"],
+            ["Golden outfit", 180, "Gold"],
+            ["Black suit", 250, "Black"],
+            ["Pink outfit", 100, "Pink"],
+          ],
+          Supermarket: [
+            ["Fresh fruit", 8, "fruit"],
+            ["Meal box", 16, "meal"],
+            ["Groceries for a week", 45, "groceries"],
+          ],
+          "Furniture Gallery": [
+            ["Comfy sofa", 90, "sofa"],
+            ["Study desk", 110, "desk"],
+            ["Houseplants", 35, "plants"],
+            ["Large TV", 250, "tv"],
+            ["Bookshelf", 75, "bookshelf"],
+            ["Piano", 650, "piano"],
+            ["Dining table", 180, "table"],
+            ["Floor lamp", 45, "lamp"],
+            ["Cozy rug", 60, "rug"],
+            ["Painting", 120, "painting"],
+          ],
+        };
+        var FURN = [
+          ["sofa", "🛋️"],
+          ["desk", "🖥️"],
+          ["plants", "🪴"],
+          ["tv", "📺"],
+          ["bookshelf", "📚"],
+          ["piano", "🎹"],
+          ["table", "🪑"],
+          ["lamp", "💡"],
+          ["rug", "🟠"],
+          ["painting", "🖼️"],
+        ];
+        // Each item sits in its own spot (0-9) unless the player moved it.
+        function furnSlot(k) {
+          var s = S.decorSlots[k];
+          if (s === undefined)
+            s = FURN.map(function (f) {
+              return f[0];
+            }).indexOf(k);
+          return ((s % 10) + 10) % 10;
+        }
+        function seasonName() {
+          return ["Spring", "Summer", "Autumn", "Winter"][
+            Math.floor((S.day - 1) / 15) % 4
+          ];
+        }
+        function netWorth() {
+          return (
+            S.cash +
+            S.bank +
+            (S.owns.apartment ? 700 : 0) +
+            (S.owns.townhouse ? 1700 : 0) +
+            (S.mansion ? 3000 : 0)
+          );
+        }
+        function claimAchievement(m) {
+          if (S.achievementClaims[m[0]] || !m[4]()) return;
+          S.achievementClaims[m[0]] = 1;
+          S.cash += m[3];
+          S.lifetimeEarned += m[3];
+          cityNotice("🏆 Achievement: " + m[1] + "! +" + fmtCash(m[3]));
+          cityAchievements();
+        }
+        function cityStory() {
+          cityScreen(
+            "📖 Story Missions",
+            "Complete chapters in order to unlock your life story.",
+            function (d) {
+              STORY.forEach(function (m, i) {
+                var prior = i === 0 || !!S.storyClaims[STORY[i - 1][0]],
+                  claimed = !!S.storyClaims[m[0]],
+                  ready = prior && m[4]();
+                var b = mbtn(
+                  d,
+                  claimed ? "✅" : ready ? "🎁" : "🔒",
+                  m[1] +
+                    " — " +
+                    m[2] +
+                    " · " +
+                    fmtCash(m[3]) +
+                    (claimed ? " · Completed" : ""),
+                  function () {
+                    if (!ready || claimed) return;
+                    S.storyClaims[m[0]] = 1;
+                    var reward =
+                      m[3] +
+                      (S.career === "Entrepreneur"
+                        ? Math.round(m[3] * 0.1)
+                        : 0);
+                    S.cash += reward;
+                    S.lifetimeEarned += reward;
+                    cityNotice(
+                      "Story completed: " + m[1] + "! +" + fmtCash(reward),
+                    );
+                    cityStory();
+                  },
+                );
+                b.disabled = claimed || !ready;
+              });
+            },
+          );
+        }
+        function cityLayout() {
+          cityScreen(
+            "🪴 Decorate Home",
+            "Pick a layout for each furniture item. See changes inside your home.",
+            function (d) {
+              FURN.forEach(function (f) {
+                var k = f[0];
+                if (!S.furniture[k]) return;
+                var slot = furnSlot(k);
+                mbtn(
+                  d,
+                  f[1],
+                  k + " · location " + (slot + 1) + " / 10 — move",
+                  function () {
+                    S.decorSlots[k] = (slot + 1) % 10;
+                    save();
+                    cityLayout();
+                  },
+                );
+              });
+              mbtn(
+                d,
+                "🎨",
+                "Interior: " + S.houseStyle + " — change wallpaper",
+                function () {
+                  var a = ["Classic", "Ocean", "Sunset", "Forest", "Midnight"],
+                    i = a.indexOf(S.houseStyle);
+                  S.houseStyle = a[(i + 1) % a.length];
+                  save();
+                  cityLayout();
+                },
+              );
+            },
+          );
+        }
+        function cityInvite() {
+          cityScreen(
+            "💌 Invite Friends",
+            "Invite residents who know you to spend time at your home.",
+            function (d) {
+              var names = NP.filter(function (n) {
+                return n.name && !n.cop && !n.amb;
+              });
+              names.forEach(function (n) {
+                var a = lvl(n.name),
+                  b = mbtn(
+                    d,
+                    "👋",
+                    n.name +
+                      " · affection " +
+                      a +
+                      (a < 3 ? " · needs 3" : " · invite"),
+                    function () {
+                      if (a < 3) return;
+                      S.invites++;
+                      S.invitedGuest = n.name;
+                      S.guestDay = S.day;
+                      S.lv[n.name] = a + 2;
+                      S.hap = Math.min(100, S.hap + 6);
+                      adv(2);
+                      cityNotice(
+                        n.name +
+                          " visited your " +
+                          S.activeHome +
+                          "! +2 friendship and +6 happiness.",
+                      );
+                      cityInvite();
+                    },
+                  );
+                b.disabled = a < 3;
+              });
+            },
+          );
+        }
+        function cityShops() {
+          cityScreen(
+            "🛍️ Local Shopping",
+            "Browse shops here; visit their buildings to buy or use a service.",
+            function (d) {
+              [
+                "Clothing Boutique",
+                "Supermarket",
+                "Furniture Gallery",
+                "Real Estate Office",
+                "Motor Garage",
+              ].forEach(function (k) {
+                mbtn(d, "📍", "Visit " + k, function () {
+                  var b = B.filter(function (x) {
+                    return x.n === k;
+                  })[0];
+                  if (!b) return;
+                  S.in = null;
+                  ov.hidden = true;
+                  document.body.classList.remove("in");
+                  S.x = b.dx;
+                  S.y = b.dy + 85;
+                  closeMenu();
+                  phn.hidden = true;
+                  cityNotice(
+                    "Travelled to " + k + ". Walk toward the entrance.",
+                  );
+                });
+              });
+            },
+          );
+        }
+        function cityStore(name) {
+          cityScreen(
+            "🛍️ " + name,
+            "Buy directly from this shop. Everything you own is saved.",
+            function (d) {
+              (SHOP_ITEMS[name] || []).forEach(function (a) {
+                var owned =
+                  name === "Clothing Boutique"
+                    ? !!(S.outfitsOwned || {})[a[2]]
+                    : name === "Furniture Gallery"
+                      ? !!S.furniture[a[2]]
+                      : false;
+                var b = mbtn(
+                  d,
+                  "🛍️",
+                  a[0] + " — " + (owned ? "Owned" : fmtCash(a[1])),
+                  function () {
+                    if (owned || !citySpend(a[1])) return;
+                    if (name === "Clothing Boutique") {
+                      S.outfitsOwned = S.outfitsOwned || {};
+                      S.outfitsOwned[a[2]] = 1;
+                      S.outfit = a[2];
+                    }
+                    if (name === "Furniture Gallery") S.furniture[a[2]] = 1;
+                    if (name === "Supermarket") {
+                      var healing = { fruit: 5, meal: 12, groceries: 25 }[a[2]];
+                      S.en = Math.min(MAXE, S.en + healing);
+                      S.hap = Math.min(100, S.hap + 2);
+                    }
+                    S.storePurchases[name] = (S.storePurchases[name] || 0) + 1;
+                    cityNotice("Purchased " + a[0] + ".");
+                    cityStore(name);
+                  },
+                );
+                b.disabled = owned;
+              });
+            },
+          );
+        }
+        function cityElection() {
+          cityScreen(
+            "🏛️ Mayor Election",
+            "Campaign at the Office (City Hall). Eligibility: 20 karma · CHA 25 · 5 friends met · $500 campaign fee.",
+            function (d) {
+              var eligible =
+                S.k >= 20 && S.cha >= 25 && S.talksDone >= 5 && S.cash >= 500;
+              var b = mbtn(
+                d,
+                "🗳️",
+                S.mayor ? "You are the Mayor!" : "Campaign for Mayor — $500",
+                function () {
+                  if (S.mayor || !eligible) return;
+                  S.cash -= 500;
+                  S.lifetimeSpent += 500;
+                  S.mayor = 1;
+                  S.k += 10;
+                  S.hap = Math.min(100, S.hap + 20);
+                  cityNotice("You won the election! Mayor of Stick City!");
+                  cityElection();
+                },
+              );
+              b.disabled = !eligible || !!S.mayor;
+            },
+          );
+        }
+        function citySeasonalEvent() {
+          var festival = S.day % 7 === 0,
+            nm = seasonName();
+          cityScreen(
+            "🎪 City Festival",
+            festival
+              ? "The " + nm + " community fair is in town!"
+              : "City festival every seventh day. Next: Day " +
+                  (S.day + 7 - (S.day % 7)),
+            function (d) {
+              var b = mbtn(
+                d,
+                "🎡",
+                "Attend festival — $15 (+4 karma, +8 happiness)",
+                function () {
+                  if (!festival || S.festivals[S.day] || !citySpend(15)) return;
+                  S.festivals[S.day] = 1;
+                  S.festivalVisits++;
+                  S.k += 4;
+                  S.hap = Math.min(100, S.hap + 8);
+                  adv(2);
+                  cityNotice("You enjoyed the " + nm + " festival!");
+                  citySeasonalEvent();
+                },
+              );
+              b.disabled = !festival || !!S.festivals[S.day];
+            },
+          );
+        }
+        function cityNeighborhood() {
+          cityScreen(
+            "👥 Neighbors",
+            "Each resident has their own job, favorite hangout and home. Work 9–17, hang out before and after, home by 21. Their feelings persist.",
+            function (d) {
+              NP.filter(function (n) {
+                return n.name && !n.cop && !n.amb;
+              }).forEach(function (n) {
+                var m = S.npcMemory[n.name] || {},
+                  status =
+                    S.t >= 21 || S.t < 7
+                      ? "home"
+                      : S.t >= 9 && S.t < 17
+                        ? "working at the " + n.work
+                        : "hanging out at the " + n.fun;
+                mbtn(
+                  d,
+                  "👤",
+                  n.name +
+                    " · " +
+                    status +
+                    " · " +
+                    (m.last || "We haven't spoken") +
+                    " · friendship " +
+                    lvl(n.name),
+                  function () {
+                    cityHub();
+                  },
+                );
+              });
+            },
+          );
+        }
         var CAREERS = [
           [
             "Entrepreneur",
@@ -4654,11 +6121,15 @@
           dest[key] = 1;
           cityNotice("Purchased " + title + " for " + fmtCash(price) + "!");
         }
+        var overnightMsg = "";
         function cityNewDay() {
           var w = ["Sunny", "Sunny", "Cloudy", "Rain", "Rain", "Fog", "Storm"];
           S.weather = S.forecast || "Sunny";
+          S.seasonsSeen[seasonName()] = 1;
+          S.moneyPeak = Math.max(S.moneyPeak, S.cash + S.bank);
           S.forecast = w[Math.floor(Math.random() * w.length)];
-          var income = 0;
+          var msgs = [],
+            income = 0;
           var rates = {
             cafe: 28,
             delivery: 38,
@@ -4667,12 +6138,13 @@
             factory: 80,
           };
           Object.keys(S.businesses).forEach(function (k) {
-            income += rates[k] || 0;
+            income += (rates[k] || 0) * (1 + (S.businessUpgrades[k] || 0));
           });
           if (income) {
             S.cash += income;
             S.lifetimeEarned += income;
-            cityNotice(
+            S.lifetimeBusiness += income;
+            msgs.push(
               "Your businesses earned " + fmtCash(income) + " overnight.",
             );
           }
@@ -4680,14 +6152,40 @@
           if (rent) {
             S.cash += rent;
             S.lifetimeEarned += rent;
-            cityNotice("Rental income: " + fmtCash(rent) + ".");
+            S.lifetimeRent += rent;
+            msgs.push("Rental income: " + fmtCash(rent) + ".");
           }
           if (S.day % 7 === 0)
-            cityNotice(
-              "🎉 Weekend city festival! Talk to residents for extra friendship.",
+            msgs.push(
+              "🎪 Seasonal city festival! Visit the Cafe for the community fair.",
             );
+          if (["Rain", "Storm"].indexOf(S.weather) >= 0) {
+            S.weatherEvents++;
+            if (S.weather === "Storm" && Math.random() < 0.4) {
+              S.en = Math.max(1, S.en - 2);
+              msgs.push("Thunderstorm! You lost 2 energy.");
+            }
+          }
+          if (S.weather === "Sunny") {
+            S.hap = Math.min(100, S.hap + 1);
+          }
+          if (S.career === "Free Spirit") {
+            S.hap = Math.min(100, S.hap + 2);
+          }
+          if (S.career === "City Hero" && S.k >= 10) {
+            S.k += 1;
+          }
+          if (S.weather === "Fog")
+            msgs.push("Heavy fog makes driving slower today.");
+          if (S.day % 15 === 1)
+            msgs.push("🍃 " + seasonName() + " has arrived in Stick City!");
           S.daily = { day: S.day, work: 0, talk: 0, explore: 0 };
           if (S.driving && !S.vehicle) S.driving = false;
+          overnightMsg = msgs.join(" ");
+          if (overnightMsg) {
+            say(overnightMsg);
+            addLog(overnightMsg);
+          }
         }
         function cityReward(id) {
           var m = MISSIONS.filter(function (q) {
@@ -4708,15 +6206,14 @@
           held = {};
           mshow(title, [description], function (d) {
             builder(d);
-            mbtn(
-              d,
-              "⬅️",
-              "Back",
-              back ||
-                function () {
-                  cityHub();
-                },
-            );
+            mbtn(d, "⬅️", "Back", function () {
+              if (back) back();
+              else if (cityBackTo) {
+                var b = cityBackTo;
+                closeMenu();
+                enter(b);
+              } else cityHub();
+            });
             mbtn(d, "▶️", "Return to city", closeMenu);
           });
         }
@@ -4739,6 +6236,7 @@
               " · " +
               fmtCash(S.cash),
             function (d) {
+              mbtn(d, "📖", "Story chapters", cityStory);
               mbtn(d, "🎯", "Missions & rewards", cityMissions);
               mbtn(d, "📅", "Daily challenges", cityDaily);
               mbtn(d, "🧭", "Choose life path", cityCareer);
@@ -4749,6 +6247,9 @@
               mbtn(d, "🗺️", "Travel guide & weather", cityTravel);
               mbtn(d, "🎲", "City minigames", cityGames);
               mbtn(d, "🏆", "Achievements", cityAchievements);
+              mbtn(d, "🛍️", "Visit local shops", cityShops);
+              mbtn(d, "👥", "Neighbors", cityNeighborhood);
+              mbtn(d, "🎪", "Seasonal festival", citySeasonalEvent);
             },
             function () {
               menu(false);
@@ -4859,51 +6360,46 @@
         }
         function cityHomes() {
           cityScreen(
-            "🏡 Property & Decor",
-            "Build your home. Rental properties pay you each morning.",
+            "🏡 Home & Property",
+            "Own multiple homes, move in, decorate rooms and invite friends. Investment properties earn rent.",
             function (d) {
               [
-                ["apartment", "Rental apartment", 700],
+                ["starter", "Starter home", 0],
+                ["apartment", "Apartment", 700],
                 ["townhouse", "Townhouse", 1700],
+                ["mansion", "Mansion", 3000],
               ].forEach(function (a) {
+                var owned =
+                  a[0] === "starter" ||
+                  (a[0] === "mansion" ? !!S.mansion : !!S.owns[a[0]]);
                 var b = mbtn(
                   d,
                   "🏠",
-                  a[1] + " — " + (S.owns[a[0]] ? "Owned" : fmtCash(a[2])),
+                  a[1] +
+                    " · " +
+                    (owned
+                      ? S.activeHome === a[0]
+                        ? "Living here"
+                        : "Move in"
+                      : fmtCash(a[2])),
                   function () {
-                    cityBuy(a[0], a[1], a[2], S.owns);
+                    if (!owned) {
+                      if (!citySpend(a[2])) return;
+                      if (a[0] === "mansion") S.mansion = 1;
+                      else S.owns[a[0]] = 1;
+                      cityNotice("You purchased a " + a[1] + "!");
+                    }
+                    S.activeHome = a[0];
+                    save();
                     cityHomes();
                   },
                 );
-                b.disabled = !!S.owns[a[0]];
+                b.disabled = S.activeHome === a[0];
               });
-              [
-                ["sofa", "Comfy sofa", 90],
-                ["desk", "Study desk", 110],
-                ["plants", "Houseplants", 35],
-                ["tv", "Large TV", 250],
-                ["bookshelf", "Bookshelf", 75],
-                ["piano", "Piano", 650],
-              ].forEach(function (a) {
-                var b = mbtn(
-                  d,
-                  "🛋️",
-                  a[1] + " — " + (S.furniture[a[0]] ? "Owned" : fmtCash(a[2])),
-                  function () {
-                    cityBuy(a[0], a[1], a[2], S.furniture);
-                    cityHomes();
-                  },
-                );
-                b.disabled = !!S.furniture[a[0]];
-              });
-              mbtn(d, "🛌", "Relax in your decorated home", function () {
-                S.hap = Math.min(
-                  100,
-                  S.hap + Math.min(12, 2 + Object.keys(S.furniture).length * 2),
-                );
-                adv(1);
-                cityNotice("You enjoyed your personalized home.");
-                cityHomes();
+              mbtn(d, "🪴", "Decorate and arrange furniture", cityLayout);
+              mbtn(d, "💌", "Invite a friend over", cityInvite);
+              mbtn(d, "🛒", "Visit furniture showroom", function () {
+                cityShops();
               });
             },
           );
@@ -4911,7 +6407,7 @@
         function cityBusinesses() {
           cityScreen(
             "🏢 Business Empire",
-            "Buy businesses to receive daily income, even while you explore.",
+            "Purchase businesses or upgrade their daily profit. Income arrives every morning.",
             function (d) {
               [
                 ["cafe", "Neighborhood cafe", 600, 28],
@@ -4920,69 +6416,97 @@
                 ["store", "Corner store", 1350, 52],
                 ["factory", "Small factory", 2200, 80],
               ].forEach(function (a) {
+                var lv = S.businessUpgrades[a[0]] || 0,
+                  owned = !!S.businesses[a[0]],
+                  price = owned ? (lv + 1) * 350 : a[2];
                 var b = mbtn(
                   d,
                   "💼",
                   a[1] +
-                    " — " +
-                    (S.businesses[a[0]]
-                      ? "Owned · +" + fmtCash(a[3]) + "/day"
-                      : fmtCash(a[2])),
+                    " · " +
+                    (owned
+                      ? "Level " +
+                        (lv + 1) +
+                        " · " +
+                        fmtCash(a[3] * (lv + 1)) +
+                        "/day · " +
+                        (lv >= 5 ? "Max level" : "upgrade " + fmtCash(price))
+                      : "Buy " + fmtCash(price)),
                   function () {
-                    cityBuy(a[0], a[1], a[2], S.businesses);
+                    if (!citySpend(price)) return;
+                    if (!owned) S.businesses[a[0]] = 1;
+                    else S.businessUpgrades[a[0]] = lv + 1;
+                    cityNotice(
+                      owned
+                        ? "Upgraded " + a[1] + "!"
+                        : "Purchased " + a[1] + "!",
+                    );
                     cityBusinesses();
                   },
                 );
-                b.disabled = !!S.businesses[a[0]];
+                b.disabled = owned && lv >= 5;
               });
             },
           );
         }
         function cityGarage() {
-          var vehicleTypes = { bicycle: 3.4, scooter: 5.5, car: 8 };
+          if (S.vehicle && !S.garage[S.vehicle]) S.garage[S.vehicle] = 1; // import older saves
           cityScreen(
-            "🚗 Garage",
-            "Buy a vehicle, then toggle driving for faster travel. Drive with WASD or arrows.",
+            "🚗 Vehicle Garage",
+            "Collect multiple vehicles. Select one to drive on the road; park it to walk and enter shops.",
             function (d) {
-              [
-                ["bicycle", "Bicycle", 120],
-                ["scooter", "Scooter", 480],
-                ["car", "Compact car", 1600],
-              ].forEach(function (a) {
-                var b = mbtn(
+              VEHICLES.forEach(function (a) {
+                var owned = !!S.garage[a[0]];
+                mbtn(
                   d,
-                  "🚘",
-                  a[1] + " — " + (S.vehicle === a[0] ? "Owned" : fmtCash(a[2])),
+                  a[4],
+                  a[1] +
+                    " · " +
+                    (owned
+                      ? S.vehicle === a[0]
+                        ? "Selected"
+                        : "Select"
+                      : "Buy " + fmtCash(a[2])) +
+                    " · speed " +
+                    a[3],
                   function () {
-                    if (S.vehicle === a[0]) return;
-                    if (citySpend(a[2])) {
-                      S.vehicle = a[0];
-                      S.driving = true;
-                      cityNotice("You now own a " + a[1] + "!");
-                      cityGarage();
+                    if (!owned) {
+                      if (!citySpend(a[2])) return;
+                      S.garage[a[0]] = 1;
                     }
+                    S.vehicle = a[0];
+                    S.driving = true;
+                    cityNotice("Now driving " + a[1] + ".");
+                    cityGarage();
                   },
                 );
-                b.disabled = S.vehicle === a[0];
               });
               if (S.vehicle)
                 mbtn(
                   d,
-                  "🛣️",
-                  S.driving ? "Park vehicle" : "Start driving",
+                  "🅿️",
+                  S.driving ? "Park your vehicle" : "Drive selected vehicle",
                   function () {
                     S.driving = !S.driving;
                     save();
                     cityGarage();
                   },
                 );
+              mbtn(
+                d,
+                "📏",
+                "Distance driven: " + Math.floor(S.driveDistance),
+                function () {
+                  cityGarage();
+                },
+              );
             },
           );
         }
         function cityOutfits() {
           cityScreen(
-            "👕 Wardrobe",
-            "Change your character color. Your outfit is saved.",
+            "👕 Your Wardrobe",
+            "Outfits are purchased at the Clothing Boutique. Change into an owned outfit here.",
             function (d) {
               [
                 ["Blue", "#0b63c9"],
@@ -4993,11 +6517,24 @@
                 ["Black", "#303038"],
                 ["Pink", "#f26aa8"],
               ].forEach(function (a) {
-                mbtn(
+                var owned =
+                  a[0] === "Blue" ||
+                  !!(S.outfitsOwned || {})[a[0]] ||
+                  a[0] === S.outfit;
+                var b = mbtn(
                   d,
-                  "🎨",
-                  a[0] + (S.outfit === a[0] ? " ✓" : ""),
+                  "👕",
+                  a[0] +
+                    (S.outfit === a[0]
+                      ? " ✓"
+                      : owned
+                        ? " · Wear"
+                        : " · Visit boutique"),
                   function () {
+                    if (!owned) {
+                      cityShops();
+                      return;
+                    }
                     S.outfit = a[0];
                     save();
                     cityOutfits();
@@ -5043,76 +6580,447 @@
             "🎲 City Minigames",
             "Short skill-based challenges with rewards; each attempt costs 1 game hour.",
             function (d) {
-              mbtn(d, "🔢", "Number challenge: guess from 1 to 5", function () {
-                var guess = Number(prompt("Pick a number between 1 and 5:"));
-                if (!Number.isInteger(guess) || guess < 1 || guess > 5) {
-                  cityGames();
-                  return;
-                }
-                var correct = 1 + Math.floor(Math.random() * 5);
-                adv(1);
-                if (guess === correct) {
-                  S.cash += 55;
-                  S.int++;
-                  cityNotice("Correct! " + correct + " · +$55 and +1 INT");
-                } else
-                  cityNotice(
-                    "The answer was " + correct + ". Better luck next time!",
-                  );
-                cityGames();
+              mbtn(d, "🔢", "Number challenge: guess from 1 to 5", cityGuess);
+              mbtn(d, "✊", "Rock, paper, scissors (win $25)", cityRps);
+            },
+          );
+        }
+        function cityGuess() {
+          cityScreen(
+            "🔢 Number Challenge",
+            "Pick a number from 1 to 5. Guess right for $55 and +1 INT.",
+            function (d) {
+              [1, 2, 3, 4, 5].forEach(function (guess) {
+                mbtn(d, "🔢", "Pick " + guess, function () {
+                  var correct = 1 + Math.floor(Math.random() * 5);
+                  adv(1);
+                  if (guess === correct) {
+                    S.cash += 55;
+                    S.lifetimeEarned += 55;
+                    S.int++;
+                    cityNotice("Correct! " + correct + " · +$55 and +1 INT");
+                  } else
+                    cityNotice(
+                      "The answer was " + correct + ". Better luck next time!",
+                    );
+                  cityGuess();
+                });
               });
-              mbtn(d, "✊", "Rock, paper, scissors (win $25)", function () {
-                var pick = (prompt("Rock, paper, or scissors?") || "")
-                  .trim()
-                  .toLowerCase();
-                if (["rock", "paper", "scissors"].indexOf(pick) < 0) {
-                  cityGames();
-                  return;
-                }
-                var opts = ["rock", "paper", "scissors"],
-                  bot = opts[Math.floor(Math.random() * 3)];
-                adv(1);
-                var win =
-                  (pick === "rock" && bot === "scissors") ||
-                  (pick === "paper" && bot === "rock") ||
-                  (pick === "scissors" && bot === "paper");
-                if (win) {
-                  S.cash += 25;
-                  cityNotice("You won! Opponent chose " + bot + ". +$25");
-                } else
-                  cityNotice(
-                    (pick === bot ? "Tie. " : "You lost. ") +
-                      "Opponent chose " +
-                      bot +
-                      ".",
-                  );
-                cityGames();
+            },
+            cityGames,
+          );
+        }
+        function cityRps() {
+          cityScreen(
+            "✊ Rock, Paper, Scissors",
+            "Beat the house to win $25.",
+            function (d) {
+              [
+                ["rock", "✊"],
+                ["paper", "✋"],
+                ["scissors", "✌️"],
+              ].forEach(function (o) {
+                var pick = o[0];
+                mbtn(
+                  d,
+                  o[1],
+                  pick[0].toUpperCase() + pick.slice(1),
+                  function () {
+                    var bot = ["rock", "paper", "scissors"][
+                      Math.floor(Math.random() * 3)
+                    ];
+                    adv(1);
+                    var win =
+                      (pick === "rock" && bot === "scissors") ||
+                      (pick === "paper" && bot === "rock") ||
+                      (pick === "scissors" && bot === "paper");
+                    if (win) {
+                      S.cash += 25;
+                      S.lifetimeEarned += 25;
+                      cityNotice("You won! Opponent chose " + bot + ". +$25");
+                    } else
+                      cityNotice(
+                        (pick === bot ? "Tie. " : "You lost. ") +
+                          "Opponent chose " +
+                          bot +
+                          ".",
+                      );
+                    cityRps();
+                  },
+                );
+              });
+            },
+            cityGames,
+          );
+        }
+        // CASINO: games from safe-ish to wild. Every game keeps a house edge.
+        var casinoBet = 10,
+          casinoMsg = "",
+          BETS = [
+            10,
+            50,
+            100,
+            500,
+            1000,
+            5000,
+            10000,
+            50000,
+            100000,
+            1000000,
+            "all",
+          ];
+        function casinoStake() {
+          return casinoBet === "all" ? S.cash : casinoBet;
+        }
+        function betLabel() {
+          return casinoBet === "all"
+            ? "ALL IN (" + fmtCash(S.cash) + ")"
+            : fmtCash(casinoBet);
+        }
+        function betButton(d, again) {
+          mbtn(d, "💵", "Bet: " + betLabel() + " — tap to change", function () {
+            var i = BETS.indexOf(casinoBet);
+            // Skip stakes the player can't cover.
+            for (var k = 1; k <= BETS.length; k++) {
+              var nb = BETS[(i + k) % BETS.length];
+              if (nb === "all" || nb <= S.cash) {
+                casinoBet = nb;
+                break;
+              }
+            }
+            again();
+          });
+        }
+        // Takes the stake, pays stake × mult and records stats.
+        function casinoPlay(mult, shown) {
+          var bet = casinoStake();
+          if (bet < 1 || bet > S.cash) {
+            casinoMsg =
+              S.cash < 1
+                ? "💸 You're out of cash. Go earn some and come back."
+                : "You can't cover a " +
+                  fmtCash(bet) +
+                  " bet. Lower your stake.";
+            sfx("bad");
+            return;
+          }
+          var net = Math.floor(bet * mult) - bet;
+          S.cash += net;
+          S.casino.plays++;
+          adv(0.1);
+          if (net > 0) {
+            S.casino.won += net;
+            S.casino.best = Math.max(S.casino.best, net);
+            S.lifetimeEarned += net;
+            casinoMsg =
+              shown +
+              " — " +
+              (mult >= 10 ? "🎉 BIG WIN! " : "") +
+              "+" +
+              fmtCash(net) +
+              " (" +
+              mult +
+              "×)";
+            sfx(mult >= 10 ? "up" : "coin");
+            if (net >= 1000 && mult >= 10)
+              addLog(
+                "Hit a " +
+                  mult +
+                  "× win at the casino for " +
+                  fmtCash(net) +
+                  ".",
+              );
+          } else if (net < 0) {
+            S.casino.lost -= net;
+            S.lifetimeSpent -= net;
+            casinoMsg =
+              shown +
+              " — lost " +
+              fmtCash(-net) +
+              (S.cash < 1 ? ". 💸 You're broke." : ".");
+            sfx("bad");
+            if (bet >= 10000 && S.cash < 1)
+              addLog("Lost everything at the casino.");
+          } else {
+            casinoMsg =
+              shown + " — push, you got your " + fmtCash(bet) + " back.";
+            sfx("click");
+          }
+          if (casinoBet !== "all" && casinoBet > S.cash) casinoBet = 10;
+          save();
+        }
+        function casinoScreen(title, intro, build) {
+          var self = function () {
+            casinoScreen(title, intro, build);
+          };
+          cityScreen(
+            title,
+            (casinoMsg || intro) + "  ·  Cash: " + fmtCash(S.cash),
+            function (d) {
+              betButton(d, self);
+              build(d, self);
+            },
+            casinoFloor,
+          );
+        }
+        function casinoFloor() {
+          casinoMsg = "";
+          var c = S.casino;
+          cityScreen(
+            "🎰 Lucky Stick Casino",
+            "Cash: " +
+              fmtCash(S.cash) +
+              " · Plays " +
+              c.plays +
+              " · Won " +
+              fmtCash(c.won) +
+              " · Lost " +
+              fmtCash(c.lost) +
+              " · Biggest win " +
+              fmtCash(c.best),
+            function (d) {
+              mbtn(d, "🪙", "Coin flip — 2× (safe-ish)", casinoCoin);
+              mbtn(d, "🃏", "High card vs dealer — 2×", casinoCard);
+              mbtn(d, "🎡", "Roulette — 2× or 36×", casinoRoulette);
+              mbtn(d, "🎰", "Slots — jackpot 1000×", casinoSlots);
+              mbtn(d, "🚀", "Rocket — cash out up to 100×", casinoRocket);
+              mbtn(d, "🌀", "Mega Wheel — 1000× or nothing", casinoWheel);
+            },
+          );
+        }
+        function casinoCoin() {
+          casinoScreen(
+            "🪙 Coin Flip",
+            "Call it. 48% to double your bet.",
+            function (d, again) {
+              ["Heads", "Tails"].forEach(function (side) {
+                mbtn(d, "🪙", side, function () {
+                  var win = Math.random() < 0.48,
+                    land = win ? side : side === "Heads" ? "Tails" : "Heads";
+                  casinoPlay(win ? 2 : 0, "It landed " + land);
+                  again();
+                });
               });
             },
           );
         }
-        function cityAchievements() {
-          cityScreen(
-            "🏆 Achievements",
-            "Keep playing to complete your life story.",
-            function (d) {
-              MISSIONS.forEach(function (m) {
+        function casinoCard() {
+          function name(v) {
+            return { 11: "J", 12: "Q", 13: "K", 14: "A" }[v] || String(v);
+          }
+          casinoScreen(
+            "🃏 High Card",
+            "Beat the dealer's card to win 2×. Ties go to the house.",
+            function (d, again) {
+              mbtn(d, "🃏", "Draw", function () {
+                var you = 2 + Math.floor(Math.random() * 13),
+                  dl = 2 + Math.floor(Math.random() * 13);
+                casinoPlay(
+                  you > dl ? 2 : 0,
+                  "You " + name(you) + " vs dealer " + name(dl),
+                );
+                again();
+              });
+            },
+          );
+        }
+        function casinoRoulette() {
+          var RED = [
+            1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
+          ];
+          casinoScreen(
+            "🎡 Roulette",
+            "37 pockets. Red or black pays 2×, a single number pays 36×.",
+            function (d, again) {
+              [
+                [
+                  "🔴",
+                  "Red — 2×",
+                  function (n) {
+                    return RED.indexOf(n) >= 0 ? 2 : 0;
+                  },
+                ],
+                [
+                  "⚫",
+                  "Black — 2×",
+                  function (n) {
+                    return n && RED.indexOf(n) < 0 ? 2 : 0;
+                  },
+                ],
+                [
+                  "🟢",
+                  "Green 0 — 36×",
+                  function (n) {
+                    return n === 0 ? 36 : 0;
+                  },
+                ],
+                [
+                  "7️⃣",
+                  "Lucky 7 — 36×",
+                  function (n) {
+                    return n === 7 ? 36 : 0;
+                  },
+                ],
+                [
+                  "🍀",
+                  "Lucky 17 — 36×",
+                  function (n) {
+                    return n === 17 ? 36 : 0;
+                  },
+                ],
+              ].forEach(function (o) {
+                mbtn(d, o[0], o[1], function () {
+                  var n = Math.floor(Math.random() * 37),
+                    col = n === 0 ? "🟢" : RED.indexOf(n) >= 0 ? "🔴" : "⚫";
+                  casinoPlay(o[2](n), "Ball landed on " + col + " " + n);
+                  again();
+                });
+              });
+            },
+          );
+        }
+        function casinoSlots() {
+          var SYM = [
+              ["🍒", 40],
+              ["🍋", 30],
+              ["🔔", 15],
+              ["💎", 10],
+              ["7️⃣", 5],
+            ],
+            PAY = { "🍒": 3, "🍋": 5, "🔔": 25, "💎": 100, "7️⃣": 1000 };
+          function reel() {
+            var r = Math.random() * 100;
+            for (var i = 0; i < SYM.length; i++) {
+              if (r < SYM[i][1]) return SYM[i][0];
+              r -= SYM[i][1];
+            }
+            return SYM[0][0];
+          }
+          casinoScreen(
+            "🎰 Slots",
+            "Three of a kind: 🍒 3× · 🍋 5× · 🔔 25× · 💎 100× · 7️⃣ 1000×. Any pair returns half your bet.",
+            function (d, again) {
+              mbtn(d, "🎰", "Spin", function () {
+                var r = [reel(), reel(), reel()],
+                  mult =
+                    r[0] === r[1] && r[1] === r[2]
+                      ? PAY[r[0]]
+                      : r[0] === r[1] || r[1] === r[2] || r[0] === r[2]
+                        ? 0.5
+                        : 0;
+                casinoPlay(
+                  mult,
+                  "[ " +
+                    r.join(" ") +
+                    " ]" +
+                    (mult === 1000 ? " JACKPOT!!!" : ""),
+                );
+                again();
+              });
+            },
+          );
+        }
+        function casinoRocket() {
+          casinoScreen(
+            "🚀 Rocket",
+            "Pick where to cash out. If the rocket explodes first you lose your bet. Higher targets pay more but crash more often.",
+            function (d, again) {
+              [1.5, 2, 5, 10, 25, 100].forEach(function (t) {
                 mbtn(
                   d,
-                  S.missionClaimed[m[0]] ? "🏆" : "🔒",
-                  m[1] +
-                    " — " +
-                    (S.missionClaimed[m[0]] ? "Unlocked" : "Not unlocked"),
+                  "🚀",
+                  "Cash out at " + t + "× (" + Math.round(95 / t) + "% chance)",
                   function () {
-                    cityMissions();
+                    // Chance the rocket reaches t is 0.95 / t.
+                    var crash = Math.max(
+                      1,
+                      Math.floor((0.95 / (1 - Math.random())) * 100) / 100,
+                    );
+                    casinoPlay(
+                      crash >= t ? t : 0,
+                      crash >= t
+                        ? "Rocket flew to " +
+                            crash +
+                            "×, you bailed at " +
+                            t +
+                            "×"
+                        : "💥 Rocket exploded at " + crash + "×",
+                    );
+                    again();
                   },
                 );
               });
             },
           );
         }
+        function casinoWheel() {
+          // Weights out of 100: about 75% lose it all, 1 in 12,500 hits 1000×.
+          var SEG = [
+            [0, 74.692],
+            [1.5, 15],
+            [3, 8],
+            [10, 2],
+            [50, 0.3],
+            [1000, 0.008],
+          ];
+          casinoScreen(
+            "🌀 Mega Wheel",
+            "Most spins lose everything. Some pay 1.5×, 3× or 10×. Rarely 50×. Once in a blue moon: 1000×.",
+            function (d, again) {
+              mbtn(d, "🌀", "Spin the Mega Wheel", function () {
+                var r = Math.random() * 100,
+                  m = 0;
+                for (var i = 0; i < SEG.length; i++) {
+                  if (r < SEG[i][1]) {
+                    m = SEG[i][0];
+                    break;
+                  }
+                  r -= SEG[i][1];
+                }
+                casinoPlay(
+                  m,
+                  m
+                    ? "The wheel stopped on " + m + "×"
+                    : "The wheel stopped on ✖",
+                );
+                again();
+              });
+            },
+          );
+        }
+        function cityAchievements() {
+          cityScreen(
+            "🏆 Achievement Collection",
+            "Earn unique badges and claim cash rewards. " +
+              ACHIEVEMENTS.filter(function (m) {
+                return S.achievementClaims[m[0]];
+              }).length +
+              "/" +
+              ACHIEVEMENTS.length +
+              " unlocked",
+            function (d) {
+              ACHIEVEMENTS.forEach(function (m) {
+                var claimed = !!S.achievementClaims[m[0]],
+                  ready = m[4]();
+                var b = mbtn(
+                  d,
+                  claimed ? "🏆" : ready ? "🎁" : "🔒",
+                  m[1] +
+                    " — " +
+                    m[2] +
+                    " · " +
+                    (claimed ? "Unlocked" : "Reward " + fmtCash(m[3])),
+                  function () {
+                    claimAchievement(m);
+                  },
+                );
+                b.disabled = claimed || !ready;
+              });
+            },
+          );
+        }
         function cityWeather(cx, cy) {
-          if (S.weather === "Sunny") return;
+          if (S.weather === "Sunny" && seasonName() === "Summer") return;
           g.save();
           if (S.weather === "Cloudy") {
             g.fillStyle = "rgba(65,75,105,.1)";
@@ -5140,6 +7048,34 @@
               g.fillStyle = "rgba(255,255,255,.35)";
               g.fillRect(0, 0, VW, VH);
             }
+          }
+          var season = seasonName();
+          if (season === "Winter") {
+            g.fillStyle = "rgba(232,241,255,.09)";
+            g.fillRect(0, 0, VW, VH);
+            g.fillStyle = "#f7fbff";
+            for (var j = 0; j < 45; j++) {
+              var sx = (j * 107 + tick * 0.15) % VW,
+                sy = (j * 59 + tick * 0.4) % VH;
+              g.beginPath();
+              g.arc(sx, sy, 2.2, 0, 7);
+              g.fill();
+            }
+          } else if (season === "Autumn") {
+            g.fillStyle = "rgba(216,116,35,.05)";
+            g.fillRect(0, 0, VW, VH);
+            for (var j = 0; j < 20; j++) {
+              g.fillStyle = j % 2 ? "#d89a27" : "#b56b29";
+              g.fillRect(
+                (j * 91 + tick * 0.3) % VW,
+                (j * 53 + tick * 0.5) % VH,
+                5,
+                3,
+              );
+            }
+          } else if (season === "Spring") {
+            g.fillStyle = "rgba(247,153,190,.10)";
+            g.fillRect(0, 0, VW, VH);
           }
           g.restore();
         }
@@ -5221,7 +7157,8 @@
               "You slept well. Day " +
               S.day +
               " begins." +
-              (S.mansion ? " (+1 CHA)" : "");
+              (S.mansion ? " (+1 CHA)" : "") +
+              (overnightMsg ? " " + overnightMsg : "");
             if (Math.random() < 0.4)
               m += " " + ev[Math.floor(Math.random() * ev.length)]();
             say(m);
@@ -5238,6 +7175,10 @@
                   : "You’re too worn out. Eat something or sleep.",
             );
             return;
+          }
+          if (S.in && S.in.talk && !S.in.counted) {
+            S.in.counted = 1;
+            countTalk(S.in.talk);
           }
           var b0 = {
             cash: S.cash,
@@ -5261,6 +7202,7 @@
             if (ITEMS[it.give].w && !S.wpn) S.wpn = it.give;
           }
           var n = it.gain ? it.gain() : 0;
+          if (n > 0 && S.career === "Entrepreneur") n = Math.round(n * 1.1);
           S.cash += n;
           if (n > 0) {
             S.lifetimeEarned += n;
@@ -5292,10 +7234,11 @@
           d.className = "menu";
           b.items
             .concat([{ i: "➡️", t: "Leave", leave: 1 }])
-            .forEach(function (it) {
+            .forEach(function (it, idx) {
               var btn = document.createElement("button"),
                 ic = document.createElement("span"),
                 tx = document.createElement("span");
+              btn.style.setProperty("--i", idx);
               ic.className = "ico";
               ic.textContent = it.i;
               tx.textContent = it.t + " ";
@@ -5308,12 +7251,49 @@
               btn.appendChild(ic);
               btn.appendChild(tx);
               btn.disabled = !it.leave && blocked(it);
+              if (it.leave) btn.className = "leave";
               btn.onclick = function () {
-                it.leave ? leave() : act(it);
+                // Screens opened from a building lead "Back" into that building.
+                if (CITY_ITEMS.indexOf(it.t) >= 0) cityBackTo = b;
+                if (it.t === "Browse shop") {
+                  leave();
+                  cityStore(b.n);
+                } else if (
+                  it.t === "Property listings" ||
+                  it.t === "Select your home"
+                ) {
+                  leave();
+                  cityHomes();
+                } else if (it.t === "Buy, park or switch vehicles") {
+                  leave();
+                  cityGarage();
+                } else if (it.t === "Move furniture and change wallpaper") {
+                  leave();
+                  cityLayout();
+                } else if (it.t === "Invite a friend over") {
+                  leave();
+                  cityInvite();
+                } else if (it.t === "Run for Mayor") {
+                  leave();
+                  cityElection();
+                } else if (it.t === "Community festival") {
+                  leave();
+                  citySeasonalEvent();
+                } else if (it.t === "Casino floor") {
+                  leave();
+                  casinoFloor();
+                } else it.leave ? leave() : act(it);
               };
               d.appendChild(btn);
             });
           ov.appendChild(d);
+        }
+        var ovT,
+          fadeEl = document.getElementById("fade");
+        function doorFx() {
+          fadeEl.classList.remove("go");
+          void fadeEl.offsetWidth;
+          fadeEl.classList.add("go");
         }
         function enter(b) {
           sfx(b.px ? "door" : "click");
@@ -5321,6 +7301,12 @@
           keys = {};
           held = {};
           document.body.classList.add("in");
+          doorFx();
+          ov.classList.add("fresh");
+          clearTimeout(ovT);
+          ovT = setTimeout(function () {
+            ov.classList.remove("fresh");
+          }, 900);
           say("");
           if (S.quest && S.quest.to === b.n) {
             S.cash += 60;
@@ -5328,9 +7314,11 @@
             S.quest = null;
             say("Package delivered! +$60 and +3 karma.");
           }
-          S.placesVisited[b.n] = 1;
-          if (S.daily.day === S.day)
-            S.daily.explore = (S.daily.explore || 0) + 1;
+          if (!b.talk) {
+            S.placesVisited[b.n] = 1;
+            if (S.daily.day === S.day)
+              S.daily.explore = (S.daily.explore || 0) + 1;
+          }
           save();
           render();
           ov.hidden = false;
@@ -5343,6 +7331,7 @@
           S.in = null;
           ov.hidden = true;
           document.body.classList.remove("in");
+          doorFx();
           S.x = b.dx;
           S.y = b.dy + 85;
           S.face = Math.PI / 2;
@@ -5377,8 +7366,57 @@
           for (var i = 1; i < pts.length; i++) g.lineTo(pts[i].x, pts[i].y);
           g.stroke();
         }
+        // Tileable grass texture, built once.
+        var grassPat = null;
+        function grass() {
+          if (grassPat) return grassPat;
+          var c = document.createElement("canvas"),
+            q = c.getContext("2d"),
+            n = 256,
+            sd = 7;
+          function r() {
+            sd = (sd * 16807) % 2147483647;
+            return sd / 2147483647;
+          }
+          c.width = c.height = n;
+          q.fillStyle = "#33c80a";
+          q.fillRect(0, 0, n, n);
+          for (var i = 0; i < 26; i++) {
+            q.fillStyle =
+              r() < 0.5 ? "rgba(255,255,160,.07)" : "rgba(0,80,0,.08)";
+            q.beginPath();
+            q.ellipse(r() * n, r() * n, 18 + r() * 30, 10 + r() * 18, r() * 3, 0, 7);
+            q.fill();
+          }
+          for (i = 0; i < 420; i++) {
+            var x = r() * n,
+              y = r() * n;
+            q.strokeStyle =
+              r() < 0.6 ? "rgba(20,120,0,.45)" : "rgba(150,240,90,.45)";
+            q.lineWidth = 1;
+            q.beginPath();
+            q.moveTo(x, y);
+            q.lineTo(x + (r() - 0.5) * 3, y - 3 - r() * 3);
+            q.stroke();
+          }
+          grassPat = g.createPattern(c, "repeat");
+          return grassPat;
+        }
+        // Lighten (a > 0) or darken (a < 0) a #rrggbb colour.
+        function shade(c, a) {
+          var m = /^#([0-9a-f]{6})$/i.exec(c);
+          if (!m) return c;
+          var v = parseInt(m[1], 16),
+            f = function (x) {
+              x = a > 0 ? x + (255 - x) * a : x * (1 + a);
+              return Math.max(0, Math.min(255, Math.round(x)));
+            };
+          return (
+            "rgb(" + f(v >> 16) + "," + f((v >> 8) & 255) + "," + f(v & 255) + ")"
+          );
+        }
         function world() {
-          g.fillStyle = "#2fcc00";
+          g.fillStyle = grass();
           g.fillRect(0, 0, W, H);
           drawGround();
           g.lineCap = "round";
@@ -5392,13 +7430,19 @@
             g.stroke();
           });
           RD.forEach(function (p) {
-            strokeP(p, 240, "#999");
+            strokeP(p, 240, "#a7abb2");
           });
           RD.forEach(function (p) {
-            strokeP(p, 150, "#d6d6d6");
+            strokeP(p, 150, "#e1e3e6");
           });
           RD.forEach(function (p) {
-            strokeP(p, 140, "#666");
+            strokeP(p, 140, "#55595f");
+          });
+          RD.forEach(function (p) {
+            strokeP(p, 126, "rgba(255,255,255,.75)");
+          });
+          RD.forEach(function (p) {
+            strokeP(p, 120, "#5b5f66");
           });
           g.setLineDash([60, 50]);
           g.lineCap = "butt";
@@ -5408,22 +7452,86 @@
           g.setLineDash([]);
           g.lineCap = "round";
           B.forEach(function (b) {
-            g.fillStyle = b.c;
+            if (!vis(b.x + b.w / 2, b.y + b.h / 2, 320)) return;
+            // Soft cast shadow, shaded roof and a lit parapet edge.
+            g.fillStyle = "rgba(0,0,0,.16)";
+            g.fillRect(b.x + 16, b.y + 18, b.w, b.h + 30);
+            g.fillStyle = "rgba(0,0,0,.1)";
+            g.fillRect(b.x + 8, b.y + 9, b.w + 4, b.h + 30);
+            if (!b._rg) {
+              b._rg = g.createLinearGradient(b.x, b.y, b.x + b.w, b.y + b.h);
+              b._rg.addColorStop(0, shade(b.c, 0.22));
+              b._rg.addColorStop(1, shade(b.c, -0.18));
+              b._fg = g.createLinearGradient(0, b.y + b.h, 0, b.y + b.h + 30);
+              b._fg.addColorStop(0, shade(b.c, -0.35));
+              b._fg.addColorStop(1, shade(b.c, -0.6));
+            }
+            g.fillStyle = b._rg;
             g.strokeStyle = "#000";
             g.lineWidth = 3;
             g.fillRect(b.x, b.y, b.w, b.h);
             g.strokeRect(b.x, b.y, b.w, b.h);
-            g.fillStyle = "rgba(0,0,0,.35)";
+            g.strokeStyle = "rgba(255,255,255,.35)";
+            g.lineWidth = 2;
+            g.beginPath();
+            g.moveTo(b.x + 4, b.y + b.h - 4);
+            g.lineTo(b.x + 4, b.y + 4);
+            g.lineTo(b.x + b.w - 4, b.y + 4);
+            g.stroke();
+            g.strokeStyle = "#000";
+            g.lineWidth = 3;
+            // Front facade with framed, reflective windows.
+            g.fillStyle = b._fg;
             g.fillRect(b.x, b.y + b.h, b.w, 30);
             g.strokeRect(b.x, b.y + b.h, b.w, 30);
-            g.fillStyle = "#00c8ff";
-            for (var w = b.x + 16; w < b.x + b.w - 40; w += 56)
+            for (var w = b.x + 16; w < b.x + b.w - 40; w += 56) {
+              g.fillStyle = "#1d2a3a";
+              g.fillRect(w - 2, b.y + b.h + 4, 36, 22);
+              g.fillStyle = "#5fd3ff";
               g.fillRect(w, b.y + b.h + 6, 32, 18);
-            g.fillStyle = "#5a3200";
+              g.fillStyle = "rgba(255,255,255,.55)";
+              g.beginPath();
+              g.moveTo(w + 4, b.y + b.h + 24);
+              g.lineTo(w + 14, b.y + b.h + 6);
+              g.lineTo(w + 20, b.y + b.h + 6);
+              g.lineTo(w + 10, b.y + b.h + 24);
+              g.fill();
+            }
+            g.fillStyle = "#3a2410";
+            g.fillRect(b.dx - 24, b.dy - 33, 48, 33);
+            g.fillStyle = "#6b3e12";
             g.fillRect(b.dx - 20, b.dy - 30, 40, 30);
             g.strokeRect(b.dx - 20, b.dy - 30, 40, 30);
+            g.fillStyle = "rgba(255,220,140,.5)";
+            g.fillRect(b.dx - 14, b.dy - 26, 28, 8);
             g.fillStyle = "#fff";
             deco(b);
+            if (S.day % 7 === 0 && b.n === "Cafe") {
+              for (var k = 0; k < 10; k++) {
+                g.fillStyle = ["#ff4b6e", "#ffd152", "#52bdff", "#b77bef"][
+                  k % 4
+                ];
+                g.beginPath();
+                g.moveTo(b.x + k * 24, b.y - 28);
+                g.lineTo(b.x + k * 24 + 11, b.y - 7);
+                g.lineTo(b.x + k * 24 + 22, b.y - 28);
+                g.fill();
+              }
+              g.font = "24px Arial";
+              g.fillText("🎪", b.x + b.w / 2, b.y - 35);
+            }
+            if (seasonName() === "Winter") {
+              g.fillStyle = "#e6f6ff";
+              g.fillRect(b.x, b.y - 5, b.w, 8);
+              if (b.n === "Home" || b.n === "Corner Store") {
+                g.font = "22px Arial";
+                g.fillText("❄️", b.x + b.w - 25, b.y - 15);
+              }
+            }
+            if (seasonName() === "Autumn" && b.n === "Home") {
+              g.font = "22px Arial";
+              g.fillText("🍂", b.x + 40, b.y - 12);
+            }
             g.fillStyle = "#fff";
             g.font = '26px "Patrick Hand","Comic Sans MS",cursive';
             g.textAlign = "center";
@@ -5432,12 +7540,145 @@
             g.strokeStyle = "rgba(0,0,0,.65)";
             g.strokeText(b.n, b.x + b.w / 2, b.y + b.h / 2 + 8);
             g.fillText(b.n, b.x + b.w / 2, b.y + b.h / 2 + 8);
+            // Bouncing door marker when the player is close.
+            var dd = Math.hypot(S.x - b.dx, S.y - b.dy);
+            if (dd < 230 && !S.in) {
+              var bob = Math.sin(tick * 0.15),
+                by = b.dy - 62 + bob * 6;
+              g.globalAlpha = Math.min(1, (230 - dd) / 80);
+              g.fillStyle = "rgba(255,230,120,.35)";
+              g.beginPath();
+              g.ellipse(b.dx, b.dy + 6, 34 + bob * 4, 12, 0, 0, 7);
+              g.fill();
+              g.fillStyle = "#ffd23a";
+              g.strokeStyle = "#000";
+              g.lineWidth = 3;
+              g.beginPath();
+              g.moveTo(b.dx - 13, by - 12);
+              g.lineTo(b.dx + 13, by - 12);
+              g.lineTo(b.dx, by + 4);
+              g.closePath();
+              g.fill();
+              g.stroke();
+              g.globalAlpha = 1;
+            }
           });
           drawProps();
           drawDrops();
         }
+        // Butterflies by day, fireflies at night, falling leaves in autumn.
+        var AMB = [],
+          DUST = [];
+        function ambient() {
+          var dk = dark(),
+            ssn = seasonName(),
+            wet = S.weather === "Rain" || S.weather === "Storm",
+            kind =
+              ssn === "Autumn"
+                ? 2
+                : ssn === "Winter" || wet
+                  ? -1
+                  : dk > 0.3
+                    ? 1
+                    : 0;
+          if (kind < 0) return;
+          while (AMB.length < 16)
+            AMB.push({ k: -1, ph: Math.random() * 6.28, t: 0 });
+          AMB.forEach(function (a, i) {
+            if (a.k !== kind || !vis(a.x, a.y, 80)) {
+              a.k = kind;
+              a.t = 0;
+              a.x = camX + Math.random() * vw;
+              a.y = camY + Math.random() * vh;
+              a.vx = (Math.random() - 0.5) * 1.2;
+              a.vy = (Math.random() - 0.5) * 1.2;
+            }
+            a.t++;
+            a.ph += 0.1;
+            g.globalAlpha = Math.min(1, a.t / 40);
+            if (kind === 0) {
+              a.x += a.vx + Math.cos(a.ph * 0.7) * 0.8;
+              a.y += a.vy + Math.sin(a.ph * 1.3) * 0.8;
+              var fl = 0.25 + Math.abs(Math.sin(a.ph * 2.4)) * 0.75;
+              g.fillStyle = ["#ffd23a", "#ff7ac0", "#7ad0ff", "#ff9a3a"][i % 4];
+              g.strokeStyle = "#222";
+              g.lineWidth = 1;
+              [-1, 1].forEach(function (sd) {
+                g.beginPath();
+                g.ellipse(a.x + sd * 5 * fl, a.y, 5 * fl, 6, 0, 0, 7);
+                g.fill();
+                g.stroke();
+              });
+              g.fillStyle = "#222";
+              g.fillRect(a.x - 1, a.y - 5, 2, 10);
+            } else if (kind === 1) {
+              a.x += a.vx * 0.4 + Math.cos(a.ph * 0.3) * 0.4;
+              a.y += a.vy * 0.4 + Math.sin(a.ph * 0.4) * 0.4;
+              var gl = 0.5 + 0.5 * Math.sin(a.ph * 0.9 + i);
+              g.fillStyle = "rgba(220,255,120," + 0.18 * gl + ")";
+              g.beginPath();
+              g.arc(a.x, a.y, 11, 0, 7);
+              g.fill();
+              g.fillStyle = "rgba(240,255,170," + (0.4 + 0.6 * gl) + ")";
+              g.beginPath();
+              g.arc(a.x, a.y, 2.5, 0, 7);
+              g.fill();
+            } else {
+              a.y += 0.9;
+              a.x += Math.sin(a.ph * 0.5) * 1.3;
+              g.save();
+              g.translate(a.x, a.y);
+              g.rotate(Math.sin(a.ph * 0.5) * 0.9);
+              g.fillStyle = ["#e2741d", "#d9a21b", "#c8461f"][i % 3];
+              g.beginPath();
+              g.ellipse(0, 0, 7, 3.5, 0, 0, 7);
+              g.fill();
+              g.restore();
+            }
+          });
+          g.globalAlpha = 1;
+        }
+        function drawDust() {
+          DUST = DUST.filter(function (d) {
+            return d.t < 28;
+          });
+          DUST.forEach(function (d) {
+            d.t++;
+            g.fillStyle = "rgba(235,225,200," + 0.4 * (1 - d.t / 28) + ")";
+            g.beginPath();
+            g.arc(d.x, d.y - d.t * 0.3, 4 + d.t * 0.35, 0, 7);
+            g.fill();
+          });
+        }
+        var vigG = null,
+          vigK = "";
+        function vignette() {
+          var k = VW + "x" + VH;
+          if (vigK !== k) {
+            vigK = k;
+            vigG = g.createRadialGradient(
+              VW / 2,
+              VH / 2,
+              Math.min(VW, VH) * 0.42,
+              VW / 2,
+              VH / 2,
+              Math.hypot(VW, VH) * 0.62,
+            );
+            vigG.addColorStop(0, "rgba(0,0,25,0)");
+            vigG.addColorStop(1, "rgba(0,0,25,.34)");
+          }
+          g.fillStyle = vigG;
+          g.fillRect(0, 0, VW, VH);
+        }
         function player(x, y, mv) {
           var s = mv ? Math.sin(S.ph) * 10 : 0;
+          if (mv && !paused && tick % (S.driving ? 3 : 7) === 0)
+            DUST.push({
+              x: x - Math.cos(S.face) * (S.driving ? 34 : 14),
+              y: y - Math.sin(S.face) * (S.driving ? 34 : 14) + 8,
+              t: 0,
+            });
+          drawDust();
           g.fillStyle = "rgba(0,0,0,.2)";
           g.beginPath();
           g.ellipse(x + 4, y + 12, 24, 16, 0, 0, 7);
@@ -5447,14 +7688,14 @@
           g.rotate(S.face);
           if (S.driving && S.vehicle) {
             g.fillStyle =
-              S.vehicle === "car"
+              ["car", "sportscar"].indexOf(S.vehicle) >= 0
                 ? "#e8b024"
-                : S.vehicle === "scooter"
+                : ["scooter", "motorcycle"].indexOf(S.vehicle) >= 0
                   ? "#ff5b50"
                   : "#e3e3e3";
             g.strokeStyle = "#222";
             g.lineWidth = 3;
-            if (S.vehicle === "car") {
+            if (S.vehicle === "car" || S.vehicle === "sportscar") {
               g.fillRect(-30, -31, 67, 62);
               g.strokeRect(-30, -31, 67, 62);
               g.fillStyle = "#a7dcf6";
@@ -5466,6 +7707,10 @@
               g.stroke();
             }
           }
+          var bs = mv
+            ? 1 + Math.abs(Math.sin(S.ph)) * 0.06
+            : 1 + Math.sin(tick * 0.06) * 0.015;
+          g.scale(bs, bs);
           g.strokeStyle = "#000";
           g.lineWidth = 3;
           g.lineCap = "round";
@@ -5549,24 +7794,47 @@
             g.strokeRect(80, 200, 80, 40);
           }
           if (b.n === "Home") {
+            // Drawn in the left "window" panel, which the options box never covers.
             g.save();
-            g.font = "35px Arial";
-            g.textAlign = "center";
-            var furnishing = [
-              ["sofa", "🛋️", 440, 250],
-              ["desk", "🖥️", 520, 290],
-              ["plants", "🪴", 360, 265],
-              ["tv", "📺", 600, 255],
-              ["bookshelf", "📚", 660, 280],
-              ["piano", "🎹", 720, 290],
-            ];
-            furnishing.forEach(function (f) {
-              if (S.furniture[f[0]]) g.fillText(f[1], f[2], f[3]);
+            var hue =
+              {
+                Classic: "#f3e6c4",
+                Ocean: "#a4dcee",
+                Sunset: "#f7c6a6",
+                Forest: "#b5d7ac",
+                Midnight: "#66748f",
+              }[S.houseStyle] || "#f3e6c4";
+            var owned = FURN.filter(function (f) {
+              return S.furniture[f[0]];
             });
-            if (S.mansion) {
-              g.font = "bold 22px Verdana";
-              g.fillStyle = "#e1b42c";
-              g.fillText("★ Mansion ★", 560, 125);
+            if (owned.length) {
+              g.fillStyle = hue;
+              g.fillRect(40, 100, 300, 200);
+              g.strokeRect(40, 100, 300, 200);
+              g.font = "30px Arial";
+              g.textAlign = "center";
+              owned.forEach(function (f) {
+                var s = furnSlot(f[0]);
+                g.fillText(
+                  f[1],
+                  70 + (s % 5) * 60,
+                  180 + Math.floor(s / 5) * 80,
+                );
+              });
+            }
+            g.font = "bold 14px Verdana";
+            g.textAlign = "center";
+            g.fillStyle = "#182a3f";
+            g.fillText(
+              (S.activeHome || "starter").toUpperCase() + " · " + S.houseStyle,
+              190,
+              292,
+            );
+            if (S.invitedGuest && S.guestDay === S.day) {
+              g.font = "32px Arial";
+              g.fillText("🧑", 310, 140);
+              g.font = "bold 15px Verdana";
+              g.fillText(S.invitedGuest + " visiting!", 105, 370);
             }
             g.restore();
           }
@@ -5584,6 +7852,18 @@
           });
           g.restore();
         }
+        var hudE = 0,
+          hudT = 0,
+          hudC = 0;
+        function rrect(x, y, w, h, r) {
+          g.beginPath();
+          g.moveTo(x + r, y);
+          g.arcTo(x + w, y, x + w, y + h, r);
+          g.arcTo(x + w, y + h, x, y + h, r);
+          g.arcTo(x, y + h, x, y, r);
+          g.arcTo(x, y, x + w, y, r);
+          g.closePath();
+        }
         function hud() {
           g.save();
           g.translate(SA.l * pu, SA.t * pu);
@@ -5597,23 +7877,68 @@
             g.strokeText(s, x, y);
             g.fillText(s, x, y);
           }
-          tx("♥", 10, 42, "#e8141c", 34);
-          g.fillStyle = "#600000";
-          g.fillRect(48, 16, 170, 24);
-          g.fillStyle = "#ff0000";
-          g.fillRect(48, 16, (170 * S.en) / MAXE, 24);
-          g.strokeRect(48, 16, 170, 24);
-          tx(Math.round(S.en) + "/ " + MAXE, 100, 35, "#fff", 18);
-          tx("$" + S.cash, 250, 42, "#ffb300", 34);
-          var cx = 420,
+          // Narrow screens (phones held upright) get smaller type and wrapped stats.
+          var nr = VW < 760,
+            bw = nr ? 130 : 170,
+            low = S.en / MAXE < 0.25;
+          // Eased values: HP slides, a pale "damage trail" lags behind, cash counts up.
+          hudE += (S.en - hudE) * 0.2;
+          hudT = S.en < hudT ? hudT - Math.max(0.12, (hudT - S.en) * 0.04) : S.en;
+          hudC =
+            Math.abs(S.cash - hudC) < 1 ? S.cash : hudC + (S.cash - hudC) * 0.15;
+          var cashX = 44 + bw + 16;
+          g.font = (nr ? 28 : 34) + "px " + f;
+          var cx = Math.max(
+              nr ? 330 : 420,
+              cashX + g.measureText(fmtCash(S.cash)).width + 34,
+            ),
             cy = 30,
-            r = 20;
-          g.fillStyle = "#ddd";
+            r = nr ? 17 : 20;
+          g.font = (nr ? 24 : 30) + "px " + f;
+          var dayW = g.measureText("DAY " + S.day).width;
+          rrect(4, 4, cx + r + 14 + dayW + 12, 50, 16);
+          g.fillStyle = "rgba(8,14,36,.58)";
+          g.fill();
+          g.strokeStyle = "rgba(255,255,255,.22)";
+          g.lineWidth = 1.5;
+          g.stroke();
+          g.strokeStyle = "#000";
+          g.lineWidth = 2;
+          g.save();
+          var hs = low ? 1 + Math.max(0, Math.sin(tick * 0.25)) * 0.18 : 1;
+          g.translate(24, 31);
+          g.scale(hs, hs);
+          tx("♥", -14, 11, "#ff2a3a", nr ? 28 : 34);
+          g.restore();
+          rrect(44, 16, bw, 24, 8);
+          g.fillStyle = "#3a0710";
+          g.fill();
+          g.save();
+          g.clip();
+          g.fillStyle = "rgba(255,230,230,.85)";
+          g.fillRect(44, 16, (bw * Math.max(0, Math.min(MAXE, hudT))) / MAXE, 24);
+          var hg = g.createLinearGradient(0, 16, 0, 40);
+          hg.addColorStop(0, low ? "#ff8a3a" : "#ff6a6a");
+          hg.addColorStop(1, low ? "#c02a00" : "#c4001a");
+          g.fillStyle = hg;
+          g.fillRect(44, 16, (bw * Math.max(0, Math.min(MAXE, hudE))) / MAXE, 24);
+          g.fillStyle = "rgba(255,255,255,.28)";
+          g.fillRect(44, 18, bw, 8);
+          g.restore();
+          rrect(44, 16, bw, 24, 8);
+          g.strokeStyle = "rgba(255,255,255,.75)";
+          g.lineWidth = 2;
+          g.stroke();
+          g.strokeStyle = "#000";
+          tx(Math.round(S.en) + "/ " + MAXE, 44 + bw / 2 - 25, 35, "#fff", 18);
+          tx(fmtCash(Math.round(hudC)), cashX, 42, "#ffc21a", nr ? 28 : 34);
+          g.fillStyle = "#e9eef7";
           g.beginPath();
           g.arc(cx, cy, r, 0, 7);
           g.fill();
           g.stroke();
-          g.fillStyle = "#0a1cff";
+          var night = S.t < 6 || S.t >= 19;
+          g.fillStyle = night ? "#3a3f9a" : "#2a8cff";
           g.beginPath();
           g.moveTo(cx, cy);
           g.arc(
@@ -5625,15 +7950,14 @@
           );
           g.closePath();
           g.fill();
-          tx("DAY " + S.day, 455, 42, "#0a6cff", 30);
-          tx(
-            "AGE " +
-              S.age +
-              "   HAPPY " +
-              S.hap +
-              "   STR " +
-              S.str +
-              "   INT " +
+          g.font = Math.round(r * 0.95) + "px sans-serif";
+          g.textAlign = "center";
+          g.fillText(night ? "🌙" : "☀️", cx, cy + r * 0.35);
+          g.textAlign = "left";
+          tx("DAY " + S.day, cx + r + 14, 42, "#5fb0ff", nr ? 24 : 30);
+          var st1 = "AGE " + S.age + "   HAPPY " + S.hap + "   STR " + S.str,
+            st2 =
+              "INT " +
               S.int +
               "   CHA " +
               S.cha +
@@ -5641,21 +7965,50 @@
               S.k +
               (S.partner ? "   ♥ " + S.partner : "") +
               (S.won ? "   ★ PRESIDENT" : ""),
-            10,
-            76,
-            "#fff",
-            20,
-          );
-          if (S.heat >= 0.3)
+            y = 74;
+          function pill(s, py, sz) {
+            g.font = sz + "px " + f;
+            rrect(4, py - sz - 2, g.measureText(s).width + 14, sz + 9, 9);
+            g.fillStyle = "rgba(8,14,36,.45)";
+            g.fill();
+            tx(s, 10, py, "#fff", sz);
+          }
+          if (nr) {
+            pill(st1, y, 17);
+            y += 22;
+            pill(st2, y, 17);
+          } else pill(st1 + "   " + st2, y, 20);
+          if (!S.in) {
+            y += 10;
+            var wt =
+              "🌤 " +
+              S.weather +
+              " · " +
+              seasonName() +
+              " · " +
+              (S.driving ? "🚗 Driving" : "🚶 Walking");
+            g.font = "500 13px " + '"Fredoka",Verdana,sans-serif';
+            rrect(4, y, g.measureText(wt).width + 18, 24, 12);
+            g.fillStyle = "rgba(8,14,36,.55)";
+            g.fill();
+            g.fillStyle = "#fff";
+            g.fillText(wt, 13, y + 17);
+            y += 24;
+          }
+          if (S.heat >= 0.3) {
+            y += 26;
             tx(
               "WANTED " + "★".repeat(Math.min(5, Math.ceil(S.heat))),
               10,
-              104,
+              y,
               "#ff3030",
               22,
             );
-          if (S.quest)
-            tx("Deliver package to " + S.quest.to, 10, 128, "#ffe14a", 18);
+          }
+          if (S.quest) {
+            y += 24;
+            tx("Deliver package to " + S.quest.to, 10, y, "#ffe14a", 18);
+          }
           g.restore();
         }
         function mini() {
@@ -5663,12 +8016,18 @@
             sc = m / W,
             ox = VW - m - 8 - SA.r * pu,
             oy = VH - m - 8 - SA.b * pu;
-          g.fillStyle = "rgba(0,0,0,.45)";
+          g.save();
+          rrect(ox - 3, oy - 3, m + 6, m + 6, 14);
+          g.fillStyle = "rgba(8,14,36,.62)";
+          g.fill();
+          g.strokeStyle = "rgba(255,255,255,.4)";
+          g.lineWidth = 1.5;
+          g.stroke();
+          rrect(ox, oy, m, m, 11);
+          g.clip();
+          g.fillStyle = "rgba(47,160,40,.35)";
           g.fillRect(ox, oy, m, m);
-          g.strokeStyle = "#fff";
-          g.lineWidth = 1;
-          g.strokeRect(ox, oy, m, m);
-          g.strokeStyle = "#aaa";
+          g.strokeStyle = "#c9ced6";
           g.lineWidth = 2;
           RD.forEach(function (pts) {
             g.beginPath();
@@ -5688,13 +8047,22 @@
               Math.max(4, b.h * sc),
             );
           });
-          g.fillStyle = "#fff";
-          g.beginPath();
-          g.arc(ox + S.x * sc, oy + S.y * sc, 3, 0, 7);
-          g.fill();
           g.strokeStyle = "rgba(255,255,255,.7)";
           g.lineWidth = 1;
           g.strokeRect(ox + camX * sc, oy + camY * sc, vw * sc, vh * sc);
+          var pp = (tick % 60) / 60;
+          g.strokeStyle = "rgba(255,255,255," + (1 - pp) + ")";
+          g.lineWidth = 2;
+          g.beginPath();
+          g.arc(ox + S.x * sc, oy + S.y * sc, 3 + pp * 9, 0, 7);
+          g.stroke();
+          g.fillStyle = "#fff";
+          g.strokeStyle = "#1a5cff";
+          g.beginPath();
+          g.arc(ox + S.x * sc, oy + S.y * sc, 3.5, 0, 7);
+          g.fill();
+          g.stroke();
+          g.restore();
         }
         var mn = document.getElementById("mn"),
           paused = true,
@@ -5715,6 +8083,7 @@
           x.textContent = t;
           b.appendChild(a);
           b.appendChild(x);
+          b.style.setProperty("--i", d.children.length);
           b.onclick = function () {
             sfx("click");
             fn();
@@ -5722,10 +8091,16 @@
           d.appendChild(b);
           return b;
         }
+        // Skip the intro animation when a visible screen re-renders the same page.
+        function keepStill(box, panel, key) {
+          if (!box.hidden && box.dataset.k === key) panel.classList.add("still");
+          box.dataset.k = key;
+        }
         function mshow(title, lines, build) {
           mn.innerHTML = "";
           var panel = document.createElement("div");
           panel.className = "screen-panel";
+          keepStill(mn, panel, title);
           var h = document.createElement("h1");
           h.textContent = title;
           panel.appendChild(h);
@@ -5749,6 +8124,7 @@
         function closeMenu() {
           mn.hidden = true;
           cityHubFromPhone = false;
+          cityBackTo = null;
           paused = false;
           onTitle = false;
         }
@@ -5773,6 +8149,7 @@
         function menu(t) {
           paused = true;
           onTitle = t;
+          cityBackTo = null;
           keys = {};
           held = {};
           bp.hidden = true;
@@ -5923,24 +8300,34 @@
                   S.x +
                   (dx / L) *
                     (S.driving
-                      ? S.vehicle === "car"
-                        ? 9
-                        : S.vehicle === "scooter"
-                          ? 7
-                          : 5.5
+                      ? (VEHICLES.filter(function (a) {
+                          return a[0] === S.vehicle;
+                        })[0] || [0, 0, 0, 5.5])[3] *
+                        (S.weather === "Fog"
+                          ? 0.72
+                          : S.weather === "Storm"
+                            ? 0.8
+                            : 1)
                       : 4),
                 ny =
                   S.y +
                   (dy / L) *
                     (S.driving
-                      ? S.vehicle === "car"
-                        ? 9
-                        : S.vehicle === "scooter"
-                          ? 7
-                          : 5.5
+                      ? (VEHICLES.filter(function (a) {
+                          return a[0] === S.vehicle;
+                        })[0] || [0, 0, 0, 5.5])[3] *
+                        (S.weather === "Fog"
+                          ? 0.72
+                          : S.weather === "Storm"
+                            ? 0.8
+                            : 1)
                       : 4);
+              var oldX = S.x,
+                oldY = S.y;
               if (!hit(nx, S.y)) S.x = nx;
               if (!hit(S.x, ny)) S.y = ny;
+              if (S.driving)
+                S.driveDistance += Math.hypot(S.x - oldX, S.y - oldY);
               S.ph += 0.3;
               adv(0.0015);
               var ta = Math.atan2(dy, dx);
@@ -5967,14 +8354,22 @@
             world();
             NP.forEach(drawNpc);
             player(S.x, S.y, !!(dx || dy));
+            ambient();
             g.restore();
             sky(cx, cy);
             tint(cx, cy);
             lights(cx, cy);
             cityWeather(cx, cy);
+            vignette();
             mini();
             var n = paused ? null : nearby();
-            if (n) enter(n);
+            if (n && S.driving) {
+              if (parkHint !== n) {
+                parkHint = n;
+                say("Park (🅿️ or C) to go inside " + n.n + ".");
+              }
+            } else if (!n) parkHint = null;
+            if (n && !S.driving) enter(n);
             else if (!paused)
               for (var q = 0; q < NP.length; q++)
                 if (
@@ -5994,23 +8389,6 @@
             flash--;
           }
           hud();
-          if (!S.in) {
-            g.save();
-            g.font = "bold 13px Verdana";
-            g.textAlign = "left";
-            g.fillStyle = "rgba(0,0,0,.62)";
-            g.fillRect(8, 65, 195, 26);
-            g.fillStyle = "#fff";
-            g.fillText(
-              "🌤 " +
-                S.weather +
-                "  •  " +
-                (S.driving ? "🚗 Driving" : "🚶 Walking"),
-              15,
-              82,
-            );
-            g.restore();
-          }
         }
         window.addEventListener("keydown", function (e) {
           if (e.key === "Escape") {
@@ -6045,6 +8423,10 @@
           }
           if (e.key === "p" || e.key === "P") {
             phone("home");
+            return;
+          }
+          if ((e.key === "c" || e.key === "C") && !S.in && !paused) {
+            toggleDrive();
             return;
           }
           if (!S.in && !paused && !e.ctrlKey && !e.metaKey && !e.altKey) {
@@ -6089,6 +8471,25 @@
           menu(false);
         };
         document.getElementById("bagb").onclick = bag;
+        var carb = document.getElementById("carb"),
+          parkHint = null;
+        function toggleDrive() {
+          if (!S.vehicle) return;
+          S.driving = !S.driving;
+          parkHint = null;
+          say(S.driving ? "Back on the road." : "Parked. You're on foot.");
+          save();
+        }
+        carb.onclick = toggleDrive;
+        // Keep the park/drive button in sync with the garage state.
+        setInterval(function () {
+          carb.hidden = !S.vehicle;
+          carb.textContent = S.driving ? "🅿️" : "🚗";
+          carb.setAttribute(
+            "aria-label",
+            S.driving ? "Park your vehicle" : "Drive your vehicle",
+          );
+        }, 250);
         document.getElementById("phb").onclick = function () {
           phone("home");
         };
@@ -6128,8 +8529,10 @@
           SA.l = parseFloat(cs.paddingLeft) || 0;
         }
         function fit() {
-          var iw = window.innerWidth || 800,
-            ih = window.innerHeight || 520,
+          var vv = window.visualViewport,
+            iw = (vv && vv.scale === 1 && vv.width) || window.innerWidth || 800,
+            ih =
+              (vv && vv.scale === 1 && vv.height) || window.innerHeight || 520,
             a = iw / ih;
           VH = 520;
           VW = Math.round(VH * a);
@@ -6150,6 +8553,7 @@
               Math.min(roomY, VH * 0.48 - (72 * VH) / ih - 520 * roomS - 10),
             );
           pu = VW / iw;
+          pausedFrames = 0;
           readSafe();
           ZMIN = Math.max(0.4, VW / W, VH / H);
           zoomT = clampZ(zoomT);
@@ -6157,10 +8561,12 @@
           setView();
           document.documentElement.style.setProperty(
             "--ovl",
-            ((roomX + 290 * roomS) / VW) * 100 + "%",
+            ((roomX + 350 * roomS) / VW) * 100 + "%",
           );
         }
         window.addEventListener("resize", fit);
+        if (window.visualViewport)
+          window.visualViewport.addEventListener("resize", fit);
         window.addEventListener("orientationchange", function () {
           setTimeout(fit, 250);
         });
@@ -6258,6 +8664,7 @@
           if (document.hidden) release();
         });
         var lastT = 0,
+          pausedFrames = 0,
           fAcc = 0,
           STEP = 1000 / 60;
         function frame(now) {
@@ -6267,6 +8674,12 @@
           lastT = now;
           if (fAcc < STEP - 2) return;
           fAcc -= STEP;
+          // While a menu is open the scene is frozen, so stop redrawing it
+          // after it settles; this keeps the main thread free for the menus.
+          if (paused) {
+            if (pausedFrames > 2 && !shake && !flash) return;
+            pausedFrames++;
+          } else pausedFrames = 0;
           loop();
         }
         say("Welcome to Stick City. You have $100 and a dream.");
