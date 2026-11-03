@@ -400,6 +400,28 @@
           bottom: -10px;
         }
       }
+      .github-credit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #e8f1ff;
+        font: 600 13px var(--ui);
+        text-decoration: none;
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: rgba(9, 18, 46, 0.56);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        transition: background 0.15s ease;
+      }
+      .github-credit:hover {
+        background: rgba(35, 79, 165, 0.85);
+        text-decoration: underline;
+      }
+      .github-credit:focus-visible {
+        outline: 3px solid white;
+        outline-offset: 3px;
+      }
       /* Mobile + zoom additions */
       #sa {
         position: fixed;
@@ -4130,7 +4152,11 @@
                 b.y > cy + vh
               )
                 return;
-              for (var w = b.x + 16, wi = 0; w < b.x + b.w - 40; w += 56, wi++) {
+              for (
+                var w = b.x + 16, wi = 0;
+                w < b.x + b.w - 40;
+                w += 56, wi++
+              ) {
                 if ((b.x + wi * 37 + S.day * 13) % 5 < 1) continue;
                 g.globalAlpha = 0.3;
                 g.fillRect(w - 6, b.y + b.h + 2, 44, 26);
@@ -4488,6 +4514,7 @@
             ["calc", "🧮", "Calc", "#7f8c8d"],
             ["cal", "📅", "Calendar", "#e74c3c"],
             ["set", "⚙️", "Settings", "#8e8e93"],
+            ["github", "GH", "GitHub", "#24292f"],
           ],
           EATS = [
             ["🍔", "Burger", 4, 7],
@@ -4618,6 +4645,14 @@
                   "</button>"
                 );
               }).join("") +
+              "</div>";
+          } else if (pv === "github") {
+            h =
+              hd("GitHub") +
+              '<div class="card" style="text-align:center;padding:20px 12px">' +
+              '<div style="font-weight:700;font-size:22px;margin-bottom:8px">Alejo2333</div>' +
+              '<div style="margin-bottom:16px">View the creator of Stick City on GitHub.</div>' +
+              '<a class="pb" href="https://github.com/Alejo2333" target="_blank" rel="noopener noreferrer" style="text-align:center;text-decoration:none;display:block">Open GitHub Profile</a>' +
               "</div>";
           } else if (pv === "hub") {
             h =
@@ -7385,7 +7420,15 @@
             q.fillStyle =
               r() < 0.5 ? "rgba(255,255,160,.07)" : "rgba(0,80,0,.08)";
             q.beginPath();
-            q.ellipse(r() * n, r() * n, 18 + r() * 30, 10 + r() * 18, r() * 3, 0, 7);
+            q.ellipse(
+              r() * n,
+              r() * n,
+              18 + r() * 30,
+              10 + r() * 18,
+              r() * 3,
+              0,
+              7,
+            );
             q.fill();
           }
           for (i = 0; i < 420; i++) {
@@ -7412,7 +7455,13 @@
               return Math.max(0, Math.min(255, Math.round(x)));
             };
           return (
-            "rgb(" + f(v >> 16) + "," + f((v >> 8) & 255) + "," + f(v & 255) + ")"
+            "rgb(" +
+            f(v >> 16) +
+            "," +
+            f((v >> 8) & 255) +
+            "," +
+            f(v & 255) +
+            ")"
           );
         }
         function world() {
@@ -7883,9 +7932,12 @@
             low = S.en / MAXE < 0.25;
           // Eased values: HP slides, a pale "damage trail" lags behind, cash counts up.
           hudE += (S.en - hudE) * 0.2;
-          hudT = S.en < hudT ? hudT - Math.max(0.12, (hudT - S.en) * 0.04) : S.en;
+          hudT =
+            S.en < hudT ? hudT - Math.max(0.12, (hudT - S.en) * 0.04) : S.en;
           hudC =
-            Math.abs(S.cash - hudC) < 1 ? S.cash : hudC + (S.cash - hudC) * 0.15;
+            Math.abs(S.cash - hudC) < 1
+              ? S.cash
+              : hudC + (S.cash - hudC) * 0.15;
           var cashX = 44 + bw + 16;
           g.font = (nr ? 28 : 34) + "px " + f;
           var cx = Math.max(
@@ -7916,12 +7968,22 @@
           g.save();
           g.clip();
           g.fillStyle = "rgba(255,230,230,.85)";
-          g.fillRect(44, 16, (bw * Math.max(0, Math.min(MAXE, hudT))) / MAXE, 24);
+          g.fillRect(
+            44,
+            16,
+            (bw * Math.max(0, Math.min(MAXE, hudT))) / MAXE,
+            24,
+          );
           var hg = g.createLinearGradient(0, 16, 0, 40);
           hg.addColorStop(0, low ? "#ff8a3a" : "#ff6a6a");
           hg.addColorStop(1, low ? "#c02a00" : "#c4001a");
           g.fillStyle = hg;
-          g.fillRect(44, 16, (bw * Math.max(0, Math.min(MAXE, hudE))) / MAXE, 24);
+          g.fillRect(
+            44,
+            16,
+            (bw * Math.max(0, Math.min(MAXE, hudE))) / MAXE,
+            24,
+          );
           g.fillStyle = "rgba(255,255,255,.28)";
           g.fillRect(44, 18, bw, 8);
           g.restore();
@@ -8093,7 +8155,8 @@
         }
         // Skip the intro animation when a visible screen re-renders the same page.
         function keepStill(box, panel, key) {
-          if (!box.hidden && box.dataset.k === key) panel.classList.add("still");
+          if (!box.hidden && box.dataset.k === key)
+            panel.classList.add("still");
           box.dataset.k = key;
         }
         function mshow(title, lines, build) {
@@ -8117,6 +8180,19 @@
           build(d);
           panel.appendChild(d);
           mn.appendChild(panel);
+          if (title === "Stick City" || title === "Paused") {
+            var github = document.createElement("a");
+            github.className = "github-credit";
+            github.href = "https://github.com/Alejo2333";
+            github.target = "_blank";
+            github.rel = "noopener noreferrer";
+            github.textContent = "⌘ GitHub · Alejo2333 ↗";
+            github.setAttribute(
+              "aria-label",
+              "Visit Alejo2333 on GitHub (opens in a new tab)",
+            );
+            mn.appendChild(github);
+          }
           mn.hidden = false;
           var f = mn.querySelector("button:not(:disabled)");
           if (f) f.focus();
