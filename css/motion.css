@@ -1,0 +1,17 @@
+@media (prefers-reduced-motion: reduce) {
+  .screen::before,
+  .screen::after,
+  .screen-panel,
+  .screen h1,
+  .screen p,
+  .screen .menu button,
+  .ov.fresh,
+  .ov.fresh .menu button,
+  #log.pop,
+  #fade.go,
+  .cz-stage,
+  .cz-stage *,
+  .ph {
+    animation: none;
+  }
+}
