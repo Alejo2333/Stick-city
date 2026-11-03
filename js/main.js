@@ -24,45 +24,39 @@ function loop() {
   } else {
     var dx = 0,
       dy = 0;
-    if (keys.ArrowLeft || keys.a || held.l) dx--;
-    if (keys.ArrowRight || keys.d || held.r) dx++;
-    if (keys.ArrowUp || keys.w || held.u) dy--;
-    if (keys.ArrowDown || keys.s || held.d) dy++;
+    if (keys.ArrowLeft || keys.a) dx--;
+    if (keys.ArrowRight || keys.d) dx++;
+    if (keys.ArrowUp || keys.w) dy--;
+    if (keys.ArrowDown || keys.s) dy++;
+    // Keys win over the joystick, whose vector is analog (length 0..1).
+    if (!dx && !dy && held.x !== undefined) {
+      dx = held.x;
+      dy = held.y;
+    }
     if (dx || dy) {
       var L = Math.hypot(dx, dy),
-        nx =
-          S.x +
-          (dx / L) *
-            (S.driving
-              ? (VEHICLES.filter(function (a) {
-                  return a[0] === S.vehicle;
-                })[0] || [0, 0, 0, 5.5])[3] *
-                (S.weather === "Fog"
-                  ? 0.72
-                  : S.weather === "Storm"
-                    ? 0.8
-                    : 1)
-              : 4),
-        ny =
-          S.y +
-          (dy / L) *
-            (S.driving
-              ? (VEHICLES.filter(function (a) {
-                  return a[0] === S.vehicle;
-                })[0] || [0, 0, 0, 5.5])[3] *
-                (S.weather === "Fog"
-                  ? 0.72
-                  : S.weather === "Storm"
-                    ? 0.8
-                    : 1)
-              : 4);
+        m = Math.min(1, L),
+        spd =
+          m *
+          (S.driving
+            ? (VEHICLES.filter(function (a) {
+                return a[0] === S.vehicle;
+              })[0] || [0, 0, 0, 5.5])[3] *
+              (S.weather === "Fog"
+                ? 0.72
+                : S.weather === "Storm"
+                  ? 0.8
+                  : 1)
+            : 4),
+        nx = S.x + (dx / L) * spd,
+        ny = S.y + (dy / L) * spd;
       var oldX = S.x,
         oldY = S.y;
       if (!hit(nx, S.y)) S.x = nx;
       if (!hit(S.x, ny)) S.y = ny;
       if (S.driving)
         S.driveDistance += Math.hypot(S.x - oldX, S.y - oldY);
-      S.ph += 0.3;
+      S.ph += 0.3 * m;
       adv(0.0015);
       var ta = Math.atan2(dy, dx);
       S.face +=
@@ -184,22 +178,63 @@ window.addEventListener("keydown", function (e) {
 window.addEventListener("keyup", function (e) {
   keys[e.key] = false;
 });
-[
-  ["bu", "u"],
-  ["bd", "d"],
-  ["bl", "l"],
-  ["br", "r"],
-].forEach(function (p) {
-  var el = document.getElementById(p[0]);
-  el.addEventListener("pointerdown", function (e) {
-    e.preventDefault();
-    held[p[1]] = true;
-  });
-  ["pointerup", "pointerleave", "pointercancel"].forEach(function (t) {
-    el.addEventListener(t, function () {
-      held[p[1]] = false;
-    });
-  });
+// Floating joystick: touch anywhere in the lower-left zone to drop the
+// stick there, then drag. How far you push sets the walking speed.
+// It writes {x, y} into `held`, which menus already clear with held = {}.
+var joy = document.getElementById("joy"),
+  joyB = joy.firstElementChild,
+  joyK = joyB.firstElementChild,
+  joyId = null,
+  joyX = 0,
+  joyY = 0,
+  JOYR = 48,
+  JOYDZ = 0.18;
+function joyMove(e) {
+  var ox = e.clientX - joyX,
+    oy = e.clientY - joyY,
+    d = Math.hypot(ox, oy);
+  if (d > JOYR) {
+    ox *= JOYR / d;
+    oy *= JOYR / d;
+    d = JOYR;
+  }
+  joyK.style.transform = "translate(" + ox + "px," + oy + "px)";
+  var m = d / JOYR;
+  if (m < JOYDZ) {
+    held = { x: 0, y: 0 };
+    return;
+  }
+  // Rescale past the dead zone so a light push still starts at 0.
+  var k = (m - JOYDZ) / (1 - JOYDZ) / m;
+  held = { x: (ox / JOYR) * k, y: (oy / JOYR) * k };
+}
+function joyEnd(e) {
+  if (e && e.pointerId !== joyId) return;
+  joyId = null;
+  held = {};
+  joy.classList.remove("on");
+  joyB.style.left = joyB.style.top = joyK.style.transform = "";
+}
+joy.addEventListener("pointerdown", function (e) {
+  if (joyId !== null || paused) return;
+  e.preventDefault();
+  joyId = e.pointerId;
+  joy.setPointerCapture(e.pointerId);
+  var r = joy.getBoundingClientRect(),
+    pad = JOYR + 12;
+  joyX = Math.max(r.left + pad, Math.min(r.right - pad, e.clientX));
+  joyY = Math.max(r.top + pad, Math.min(r.bottom - pad, e.clientY));
+  joyB.style.left = joyX - r.left + "px";
+  joyB.style.top = joyY - r.top + "px";
+  joy.classList.add("on");
+  joyMove(e);
+});
+joy.addEventListener("pointermove", function (e) {
+  if (e.pointerId === joyId) joyMove(e);
+});
+// Entering a building hides the zone, which drops capture and lands here.
+["pointerup", "pointercancel", "lostpointercapture"].forEach(function (t) {
+  joy.addEventListener(t, joyEnd);
 });
 document.getElementById("menub").onclick = function () {
   menu(false);
@@ -391,7 +426,7 @@ cv.addEventListener("pointercancel", pend);
 });
 function release() {
   keys = {};
-  held = {};
+  joyEnd();
 }
 window.addEventListener("blur", release);
 document.addEventListener("visibilitychange", function () {

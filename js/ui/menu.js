@@ -183,7 +183,7 @@ function menu(t) {
       );
       mbtn(d, "❓", "How to play", function () {
         sub(t, "How to play", [
-          "Walk with the arrow keys or WASD, or the on-screen arrows on a touchscreen. Walk into a door to go inside.",
+          "Walk with the arrow keys or WASD, or on a touchscreen drag the joystick in the lower-left corner. Walk into a door to go inside.",
           "Zoom with the mouse wheel, the + and − keys (0 resets), the + / − buttons, or by pinching the screen.",
           "M opens this menu, I your backpack, P your phone. Esc leaves a building or closes a window.",
           "Jobs pay more as your stats rise, and karma decides which jobs you can take.",

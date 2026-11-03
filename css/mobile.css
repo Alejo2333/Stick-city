@@ -20,7 +20,6 @@
 .screen {
   overscroll-behavior: contain;
 }
-.dpad button,
 .fab button {
   touch-action: none;
   -webkit-user-select: none;
@@ -69,10 +68,9 @@ body.in #zl {
   }
 }
 @media (pointer: coarse) and (max-height: 480px) {
-  .dpad {
-    grid-template-columns: repeat(3, 52px);
-    grid-template-rows: repeat(2, 48px);
-    gap: 5px;
+  .joy-base {
+    left: 66px;
+    top: calc(100% - 66px);
   }
 }
 @media (max-height: 520px) and (orientation: landscape) {

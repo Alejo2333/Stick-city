@@ -290,7 +290,7 @@
 }
 /* Floating controls */
 .fab button,
-.dpad button {
+.joy-knob {
   background:
     radial-gradient(
       circle at 30% 25%,
@@ -309,14 +309,19 @@
 .fab button {
   border-radius: 50%;
 }
-.dpad button {
-  border-radius: 16px;
+.joy-base {
+  background: rgba(12, 22, 52, 0.32);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.3);
+}
+.joy.on .joy-knob {
+  transition: none;
+  background-color: rgba(60, 90, 170, 0.75);
 }
 .fab button:hover {
   transform: scale(1.1);
 }
-.fab button:active,
-.dpad button:active {
+.fab button:active {
   transform: scale(0.9);
   background-color: rgba(255, 255, 255, 0.3);
 }
