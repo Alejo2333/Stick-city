@@ -40,6 +40,7 @@ function showDaySummary(report, after) {
       }),
     ],
     function (d) {
+      rewindButton(d);
       mbtn(d, "▶", "Continue", function () {
         closeMenu();
         if (after) after();
@@ -49,13 +50,19 @@ function showDaySummary(report, after) {
 }
 function newDay(options) {
   options = options || {};
+  rewindCapture();
   var before = dayFinanceSnapshot();
   S.day++;
   S.t = 6;
   S.bank = Math.floor(S.bank * 1.002);
-  var cityReport = cityNewDay();
+  var cityReport = withFate("city:" + S.day, cityNewDay);
   priceTick();
-  genDrops();
+  withFate("drops:" + S.day, genDrops);
+  function ageUp(birthdayOptions) {
+    withFate("birthday:" + S.day, function () {
+      birthday(birthdayOptions);
+    });
+  }
   var report = {
     start: before,
     end: dayFinanceSnapshot(),
@@ -93,10 +100,10 @@ function newDay(options) {
   setTimeout(function () {
     if (S.life && S.life.created && typeof lifeOnBirthday === "function") {
       currentLifeDayReport = report;
-      birthday({ days: 1, report: report });
+      ageUp({ days: 1, report: report });
     } else {
       showDaySummary(report, function () {
-        birthday({ days: 1 });
+        ageUp({ days: 1 });
       });
     }
   }, 0);
@@ -156,8 +163,10 @@ function act(it) {
       " begins." +
       (S.mansion ? " (+1 CHA)" : "") +
       (overnightMsg ? " " + overnightMsg : "");
-    if (Math.random() < 0.4)
-      m += " " + ev[Math.floor(Math.random() * ev.length)]();
+    withFate("sleep:" + S.day, function () {
+      if (Math.random() < 0.4)
+        m += " " + ev[Math.floor(Math.random() * ev.length)]();
+    });
     say(m);
     save();
     render();

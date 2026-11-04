@@ -8,6 +8,7 @@ Features
 - Create a life from birth and age up one year with each in-game day, building relationships, education, a career, assets, and a legacy
 - Review one combined daily life report with market headlines, business and rental income, bank interest, investment gains or losses, stat changes, and a price graph for each stock or coin you own
 - Keep old saves by continuing at their current age; family history and achievements are stored separately from the active save
+- Turn on Stick Citizen mode to rewind up to 7 days; the market, news, and weather replay exactly the same, so you can act on what you saw
 - Save progress locally
 How to Play
 Download or clone the repository and open index.html in a browser. No installation required.
@@ -39,6 +40,7 @@ js/
   world/npcs.js       NPCs, police, conversations
   core/effects.js     sound, floating text, screen feedback, night tint
   ui/backpack.js      backpack screen, message toast
+  systems/citizen.js  Stick Citizen rewind, seeded randomness for day rollovers
   systems/market.js   stocks, prices, news
   ui/report.js        daily report screen and price charts
   ui/phone.js         phone apps, email, messages

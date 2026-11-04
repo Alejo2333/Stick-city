@@ -90,6 +90,8 @@ var S = {
   casino: { plays: 0, won: 0, lost: 0, best: 0 },
   cr: {},
   life: {},
+  seed: 0,
+  marketTick: 0,
 };
 var SK = Object.keys(S);
 S.ph = 0;
@@ -109,14 +111,17 @@ S.seasonsSeen[
   ]
 ] = 1;
 var saveWarned = false;
+function saveData() {
+  var o = {};
+  SK.forEach(function (k) {
+    o[k] = S[k];
+  });
+  return o;
+}
 function save() {
   S.moneyPeak = Math.max(S.moneyPeak || 0, S.cash + S.bank);
   try {
-    var o = {};
-    SK.forEach(function (k) {
-      o[k] = S[k];
-    });
-    localStorage.setItem(KEY, JSON.stringify(o));
+    localStorage.setItem(KEY, JSON.stringify(saveData()));
     saveWarned = false;
   } catch (e) {
     console.error("Could not save the game:", e);

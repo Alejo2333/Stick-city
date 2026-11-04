@@ -316,6 +316,24 @@ body.in .joy {
 body.in .fab {
   display: none;
 }
+/* Sits apart from the stack, along the bottom edge and clear of the joystick. */
+.fab #rewb {
+  position: fixed;
+  left: calc(10px + env(safe-area-inset-left, 0px));
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+}
+@media (pointer: coarse) {
+  .fab #rewb {
+    left: calc(50% - 23px);
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+}
+@media (pointer: coarse) and (orientation: landscape) {
+  .fab #rewb {
+    left: calc(140px + env(safe-area-inset-left, 0px));
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+}
 #log {
   position: fixed;
   left: 50%;

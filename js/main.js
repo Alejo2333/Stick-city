@@ -266,6 +266,12 @@ document.getElementById("menub").onclick = function () {
   sfx("click");
   menu(false);
 };
+var rewb = document.getElementById("rewb");
+rewb.onclick = function () {
+  sfx("click");
+  menu(false);
+  rewindScreen();
+};
 document.getElementById("bagb").onclick = function () {
   sfx("click");
   bag();
@@ -291,6 +297,7 @@ function toggleDrive() {
 carb.onclick = toggleDrive;
 // Keep the floating buttons in sync with the garage and the inbox.
 function syncFab() {
+  rewb.hidden = !citizenOn;
   carb.hidden = !S.vehicle;
   carb.textContent = S.driving ? "🅿️" : "🚗";
   carb.setAttribute(
@@ -529,4 +536,5 @@ lifeBoot();
 if (!S.life.created)
   say("Welcome to Stick City. Start a life story or continue an existing save.");
 menu(true);
+rewindResume();
 requestAnimationFrame(frame);

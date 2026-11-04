@@ -216,6 +216,8 @@ function menu(t) {
             ),
           );
         });
+      if (!t && citizenOn) mbtn(d, "⏪", "Rewind time", rewindScreen);
+      citizenToggle(d);
       if (!t)
         mbtn(d, "💾", "Save now", function () {
           save();
@@ -243,6 +245,9 @@ function menu(t) {
           "Jobs pay more as your stats rise, and karma decides which jobs you can take.",
           "Crimes can get you wanted. Cops chase you; pay at the Police Station to clear it.",
           "Progress saves automatically. Use the Life Hub app on your phone to choose a career, claim missions, buy businesses, decorate, drive, and fast-travel.",
+          "Turn on Stick Citizen in this menu to rewind up to " +
+            REWIND_DAYS +
+            " days. The future stays the same, so a coin that spiked will spike again.",
         ]);
       });
       if (!t || sv2) {

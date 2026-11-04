@@ -617,6 +617,7 @@ function lifeYearSummary(days, report) {
         mbtn(d, "✨", "Choose today's life event", function () {
           lifeShowEvent(event);
         });
+      rewindButton(d);
       mbtn(d, "📰", "Read the life feed", lifeFeedScreen);
       mbtn(d, "▶", "Return to the city", closeMenu);
     },

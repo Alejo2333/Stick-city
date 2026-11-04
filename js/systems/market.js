@@ -6,10 +6,10 @@ var AS = [
     ["LCK", "🎰", "Lucky Stick Casino", 0, 0.09, 60],
     ["PHM", "💊", "Stick Pharma", 0, 0.04, 120],
     ["NRG", "⚡", "Stick Energy", 0, 0.05, 45],
-    ["SCN", "🪙", "StickCoin", 1, 0.2, 100],
-    ["DGE", "🐶", "DogeStick", 1, 0.3, 5],
-    ["ETH", "💎", "Stickereum", 1, 0.15, 300],
-    ["MON", "🚀", "MoonRock", 1, 0.4, 2],
+    ["SCN", "🪙", "StickCoin", 1, 0.09, 100],
+    ["DGE", "🐶", "DogeStick", 1, 0.12, 5],
+    ["ETH", "💎", "Stickereum", 1, 0.07, 300],
+    ["MON", "🚀", "MoonRock", 1, 0.15, 2],
   ],
   phMsg = "";
 
@@ -106,23 +106,32 @@ function sellAll(k) {
   S.hold[k] = 0;
   return { shares: shares, proceeds: proceeds };
 }
+// Each phase gets its own fixed stream, so a price changed by a life event can
+// nudge ordinary moves but never changes which news or spikes are coming.
 function priceTick() {
   S.pp = {};
+  S.marketTick = (S.marketTick || 0) + 1;
+  var tick = "market:" + S.marketTick + ":";
+  withFate(tick + "moves", priceMoves);
+  withFate(tick + "news", newsTick);
+  withFate(tick + "moon", moonTick);
+  withFate(tick + "settle", priceSettle);
+  recordMarketHistory();
+}
+function priceMoves() {
   AS.forEach(function (a) {
     var k = a[0],
       old = S.px[k],
       r =
         (Math.random() - 0.5) * 2 * a[4] * (0.4 + Math.random() * 1.6) +
         trend(k) +
+        (a[3] ? 0.13 : 0.06) * Math.log(a[5] / old);
 
-        0.06 * Math.log(a[5] / old);
-
-    if (a[3] && a[4] >= 0.2) {
+    if (a[3] && a[4] >= 0.09) {
       var q = Math.random();
       if (q < 0.03) r = -0.5;
-      else if (q > 0.97 && a[4] >= 0.3) r = 0.8;
+      else if (q > 0.97 && a[4] >= 0.12) r = 0.8;
     }
-
 
     if (Math.abs(r) < 0.004) r = (r < 0 ? -1 : 1) * rand(0.004, 0.012);
 
@@ -133,9 +142,8 @@ function priceTick() {
       next = r2(old + (old <= MIN_PRICE || r > 0 ? 0.01 : -0.01));
     S.px[k] = next;
   });
-  newsTick();
-  moonTick();
-
+}
+function priceSettle() {
   AS.forEach(function (a) {
     var k = a[0];
     if (S.px[k] === S.pp[k])
@@ -143,7 +151,6 @@ function priceTick() {
         S.px[k] + (S.px[k] <= MIN_PRICE || Math.random() < 0.5 ? 0.01 : -0.01),
       );
   });
-  recordMarketHistory();
 }
 function trend(k) {
   S.tr[k] = (S.tr[k] || 0) * 0.7 + (Math.random() - 0.5) * 0.03;
@@ -337,9 +344,10 @@ function newsTick() {
   }
 }
 
-// Rare overnight jumps of +300% to +500%. The pull toward base price in
-// priceTick bleeds them back off, so holders get a few days to sell.
-var MOON_ODDS = { stock: 0.006, crypto: 0.015 };
+// Overnight jumps of +300% to +500% over yesterday's close, whatever else moved
+// the price today. The pull toward base price in priceTick bleeds them back off,
+// so holders get a few days to sell.
+var MOON_ODDS = { stock: 0.006, SCN: 0.03, DGE: 0.04, ETH: 0.02, MON: 0.05 };
 var MOON_NEWS = [
   "{n} skyrockets overnight",
   "Buying frenzy sends {n} to the moon",
@@ -348,9 +356,9 @@ var MOON_NEWS = [
 ];
 function moonTick() {
   AS.forEach(function (a) {
-    if (Math.random() >= (a[3] ? MOON_ODDS.crypto : MOON_ODDS.stock)) return;
-    var before = S.px[a[0]];
-    setPx(a[0], rand(4, 6));
+    if (Math.random() >= (MOON_ODDS[a[0]] || MOON_ODDS.stock)) return;
+    var before = S.pp[a[0]];
+    S.px[a[0]] = r2(Math.max(MIN_PRICE, before * rand(4, 6)));
     S.news.push(
       "🚀 " +
         pick(MOON_NEWS).replace("{n}", a[2]) +
