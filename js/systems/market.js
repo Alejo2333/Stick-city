@@ -6,10 +6,23 @@ var AS = [
     ["LCK", "🎰", "Lucky Stick Casino", 0, 0.09, 60],
     ["PHM", "💊", "Stick Pharma", 0, 0.04, 120],
     ["NRG", "⚡", "Stick Energy", 0, 0.05, 45],
+    // new stocks
+    ["BNK", "🏦", "Stick Bank & Trust", 0, 0.04, 70],
+    ["AIR", "✈️", "SkyStick Airlines", 0, 0.08, 35],
+    ["SHP", "🛒", "Stick Mart", 0, 0.05, 55],
+    ["SPC", "🛰️", "Stick Space", 0, 0.1, 150],
+    ["GAM", "🎮", "Pixel Stick Games", 0, 0.08, 65],
+    // coins
     ["SCN", "🪙", "StickCoin", 1, 0.09, 100],
     ["DGE", "🐶", "DogeStick", 1, 0.12, 5],
     ["ETH", "💎", "Stickereum", 1, 0.07, 300],
     ["MON", "🚀", "MoonRock", 1, 0.15, 2],
+    // new coins
+    ["SOL", "☀️", "SolarStick", 1, 0.09, 120],
+    ["LNK", "🔗", "StickLink", 1, 0.1, 25],
+    ["ORB", "🔮", "OrbCoin", 1, 0.11, 15],
+    ["CAT", "🐱", "CatStick", 1, 0.13, 8],
+    ["PEP", "🐸", "PepeStick", 1, 0.16, 3],
   ],
   phMsg = "";
 
@@ -165,6 +178,11 @@ var SECTOR = {
   LCK: "casino",
   PHM: "pharma",
   NRG: "energy",
+  BNK: "bank",
+  AIR: "travel",
+  SHP: "retail",
+  SPC: "space",
+  GAM: "tech",
 };
 
 // ---------- generic stock news ----------
@@ -219,6 +237,22 @@ var NEWS_SECTOR_UP = {
     ["{n} strikes a huge new oil field", 1.15, 0.15],
     ["{n} wins a clean-energy grant", 1.1, 0.1],
   ],
+  bank: [
+    ["{n} passes the stress test with flying colors", 1.08, 0.1],
+    ["Savers flock to {n} after a rate hike", 1.1, 0.1],
+  ],
+  travel: [
+    ["Record holiday bookings lift {n}", 1.12, 0.12],
+    ["{n} cuts fuel costs with new planes", 1.1, 0.1],
+  ],
+  retail: [
+    ["Black Friday crowds break records at {n}", 1.12, 0.12],
+    ["{n} launches a hit loyalty program", 1.08, 0.08],
+  ],
+  space: [
+    ["{n} lands a rocket on its first try", 1.2, 0.2],
+    ["{n} wins a moon base contract", 1.18, 0.18],
+  ],
 };
 var NEWS_SECTOR_DN = {
   tech: [
@@ -244,6 +278,22 @@ var NEWS_SECTOR_DN = {
   energy: [
     ["{n} oil spill sparks outrage", 0.7, 0.15],
     ["Pipeline explosion hits {n}", 0.75, 0.12],
+  ],
+  bank: [
+    ["Bank run scare hits {n}", 0.7, 0.15],
+    ["{n} hit with a huge regulatory fine", 0.8, 0.1],
+  ],
+  travel: [
+    ["Pilot strike grounds {n} flights", 0.78, 0.12],
+    ["{n} plane makes an emergency landing", 0.82, 0.1],
+  ],
+  retail: [
+    ["Shoppers abandon {n} after a price hike", 0.82, 0.1],
+    ["{n} warehouse hit by a supply chain jam", 0.85, 0.08],
+  ],
+  space: [
+    ["{n} rocket explodes on the launch pad", 0.65, 0.15],
+    ["{n} loses contact with its satellite", 0.78, 0.12],
   ],
 };
 
@@ -347,7 +397,18 @@ function newsTick() {
 // Overnight jumps of +300% to +500% over yesterday's close, whatever else moved
 // the price today. The pull toward base price in priceTick bleeds them back off,
 // so holders get a few days to sell.
-var MOON_ODDS = { stock: 0.006, SCN: 0.03, DGE: 0.04, ETH: 0.02, MON: 0.05 };
+var MOON_ODDS = {
+  stock: 0.006,
+  SCN: 0.03,
+  DGE: 0.04,
+  ETH: 0.02,
+  MON: 0.05,
+  SOL: 0.02,
+  LNK: 0.025,
+  ORB: 0.03,
+  CAT: 0.04,
+  PEP: 0.05,
+};
 var MOON_NEWS = [
   "{n} skyrockets overnight",
   "Buying frenzy sends {n} to the moon",
