@@ -92,6 +92,7 @@ var S = {
   life: {},
   seed: 0,
   marketTick: 0,
+  cost: {},
 };
 var SK = Object.keys(S);
 S.ph = 0;

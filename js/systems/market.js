@@ -37,6 +37,8 @@ function fmtPx(x) {
 
 AS.forEach(function (a) {
   if (!S.px[a[0]]) S.px[a[0]] = r2(Math.max(1, a[5] * (0.6 + Math.random())));
+  // Saves from before cost tracking count profit from today's price.
+  if (S.hold[a[0]] && !S.cost[a[0]]) S.cost[a[0]] = r2(S.hold[a[0]] * S.px[a[0]]);
 });
 if (!S.marketHistory || typeof S.marketHistory !== "object")
   S.marketHistory = {};
@@ -104,20 +106,27 @@ function buy(k, q) {
     return false;
   S.cash = r2(S.cash - cost);
   S.hold[k] = (S.hold[k] || 0) + q;
+  S.cost[k] = r2((S.cost[k] || 0) + cost);
   return true;
 }
-function sellAll(k) {
+function sell(k, q) {
   if (
     !AS.some(function (asset) {
       return asset[0] === k;
     })
   )
-    return { shares: 0, proceeds: 0 };
-  var shares = S.hold[k] || 0,
-    proceeds = r2(shares * (S.px[k] || 0));
+    return { shares: 0, proceeds: 0, gain: 0 };
+  var held = S.hold[k] || 0,
+    shares = Math.min(held, q),
+    proceeds = r2(shares * (S.px[k] || 0)),
+    paid = held ? r2(((S.cost[k] || 0) * shares) / held) : 0;
   S.cash = r2(S.cash + proceeds);
-  S.hold[k] = 0;
-  return { shares: shares, proceeds: proceeds };
+  S.hold[k] = held - shares;
+  S.cost[k] = S.hold[k] ? r2((S.cost[k] || 0) - paid) : 0;
+  return { shares: shares, proceeds: proceeds, gain: r2(proceeds - paid) };
+}
+function sellAll(k) {
+  return sell(k, S.hold[k] || 0);
 }
 // Each phase gets its own fixed stream, so a price changed by a life event can
 // nudge ordinary moves but never changes which news or spikes are coming.
@@ -396,18 +405,19 @@ function newsTick() {
 
 // Overnight jumps of +300% to +500% over yesterday's close, whatever else moved
 // the price today. The pull toward base price in priceTick bleeds them back off,
-// so holders get a few days to sell.
+// so holders get a few days to sell. Each asset rolls on its own, so several can
+// spike on the same day.
 var MOON_ODDS = {
-  stock: 0.006,
-  SCN: 0.03,
-  DGE: 0.04,
-  ETH: 0.02,
-  MON: 0.05,
-  SOL: 0.02,
-  LNK: 0.025,
-  ORB: 0.03,
-  CAT: 0.04,
-  PEP: 0.05,
+  stock: 0.01,
+  SCN: 0.04,
+  DGE: 0.05,
+  ETH: 0.03,
+  MON: 0.06,
+  SOL: 0.03,
+  LNK: 0.035,
+  ORB: 0.04,
+  CAT: 0.05,
+  PEP: 0.06,
 };
 var MOON_NEWS = [
   "{n} skyrockets overnight",

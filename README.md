@@ -9,6 +9,8 @@ Features
 - Review one combined daily life report with market headlines, business and rental income, bank interest, investment gains or losses, stat changes, and a price graph for each stock or coin you own
 - Keep old saves by continuing at their current age; family history and achievements are stored separately from the active save
 - Turn on Stick Citizen mode to rewind up to 7 days; the market, news, and weather replay exactly the same, so you can act on what you saw
+- Use the StickMatch dating app (18+) to meet adult matches, date them, become partners, and start a family
+- Track your whole portfolio in the Investments phone app, with profit and loss on every holding, and buy or sell any amount
 - Save progress locally
 How to Play
 Download or clone the repository and open index.html in a browser. No installation required.
@@ -44,11 +46,13 @@ js/
   systems/market.js   stocks, prices, news
   ui/report.js        daily report screen and price charts
   ui/phone.js         phone apps, email, messages
+  ui/invest.js        Investments phone app: portfolio, profit and loss, trading
   ui/creator.js       StickTube, StickStream and StickTok phone apps
   world/pickups.js    cash and gem pickups
   systems/events.js   life log, random events, death, birthdays
   data/lifesim.js     story, achievements, vehicles, shop items, furniture
   systems/life.js     life creation, annual progression, relationships, school, careers, activities, justice, and legacy
+  systems/dating.js   StickMatch dating app, dates, pregnancy and births
   city/social.js      story screen, shops, election, festival, neighbors
   city/hub.js         careers, missions, Life Hub, daily challenges
   city/property.js    homes, businesses, garage, outfits, travel

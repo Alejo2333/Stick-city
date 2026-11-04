@@ -653,6 +653,7 @@ function lifeOnBirthday(options) {
   S.life.children = S.life.people.filter(function (person) {
     return person.alive && person.role === "child";
   });
+  datingBirth();
   if (S.life.school.enrolled) {
     S.life.school.gpa = Math.max(
       1,
@@ -1079,18 +1080,19 @@ function lifePersonScreen(id) {
             save();
             lifePersonScreen(person.id);
           }).disabled = S.cash < 200;
-          mbtn(d, "💔", "Separate amicably", function () {
-            S.partner = "";
-            S.life.flags.married = 0;
-            S.life.flags.engaged = 0;
-            person.role = "friend";
-            lifeChangeAffection(person, -5);
-            lifeNote("Separated from " + person.name + ".", "family");
-            save();
-            lifeRelationshipsScreen();
-          });
         }
+        mbtn(d, "💔", "Separate amicably", function () {
+          S.partner = "";
+          S.life.flags.married = 0;
+          S.life.flags.engaged = 0;
+          person.role = "friend";
+          lifeChangeAffection(person, -5);
+          lifeNote("Separated from " + person.name + ".", "family");
+          save();
+          lifeRelationshipsScreen();
+        });
       }
+      datingButtons(d, person);
       if (person.role === "child")
         mbtn(d, "📖", "Read a story together", function () {
           lifeChangeAffection(person, 3);
@@ -1106,13 +1108,21 @@ function lifePersonScreen(id) {
 function lifeRelationshipsScreen() {
   lifePeopleScreen();
 }
-function lifeAdoptChild(partnerName) {
-  if (S.age < 18 || S.cash < 200) return false;
-  S.cash -= 200;
-  var number = S.life.children.length + 1,
+function lifeAddChild(partnerName) {
+  var number =
+      S.life.people.filter(function (person) {
+        return person.role === "child";
+      }).length + 1,
+    names = ["Milo", "Nia", "Jun", "Remy", "Ari", "Theo", "Luna", "Otis", "Wren", "Sol"].filter(function (name) {
+      return !S.life.people.some(function (person) {
+        return person.name === name;
+      });
+    }),
     child = lifeAddPerson({
       id: "child-" + S.life.lifeCount + "-" + number,
-      name: ["Milo", "Nia", "Jun", "Remy", "Ari"][Math.floor(Math.random() * 5)],
+      name: names.length
+        ? names[Math.floor(Math.random() * names.length)]
+        : "Kid " + number,
       role: "child",
       age: 0,
       personality: ["curious", "kind", "bold", "thoughtful"][
@@ -1123,6 +1133,12 @@ function lifeAdoptChild(partnerName) {
       otherParent: partnerName || "",
     });
   S.life.children.push(child);
+  return child;
+}
+function lifeAdoptChild(partnerName) {
+  if (S.age < 18 || S.cash < 200) return false;
+  S.cash -= 200;
+  var child = lifeAddChild(partnerName);
   lifeNote("Welcomed " + child.name + " into the family by adoption.", "family");
   return child;
 }

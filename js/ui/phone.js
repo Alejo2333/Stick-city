@@ -131,8 +131,10 @@ var phn = document.getElementById("phn"),
     ["msg", "💬", "Messages", "#34c759"],
     ["mail", "📧", "Email", "#4a90e2"],
     ["soc", "📸", "StickGram", "#e1306c"],
+    ["date", "💘", "StickMatch", "#ff4f81"],
     ["stk", "📈", "Stocks", "#2f6fe4"],
     ["cry", "🪙", "Crypto", "#f5a623"],
+    ["inv", "💼", "Investments", "#0d8f78"],
     ["bank", "🏦", "Bank", "#34495e"],
     ["eat", "🍕", "Eats", "#ff6b35"],
     ["calc", "🧮", "Calc", "#7f8c8d"],
@@ -295,7 +297,9 @@ function phRender() {
       " · Age " +
       S.age +
       '</div></div><div class="phg">' +
-      APPS.map(function (a) {
+      APPS.filter(function (a) {
+        return a[0] !== "date" || S.age >= 18;
+      }).map(function (a) {
         var unread = a[0] === "mail" ? unreadMailCount() : 0;
         return (
           '<button data-a="nav" data-v="' +
@@ -314,6 +318,12 @@ function phRender() {
         );
       }).join("") +
       "</div>";
+  } else if (pv === "date") {
+    h = hd("💘 StickMatch") + datingPage();
+  } else if (pv === "inv") {
+    h = hd("💼 Investments") + investPage();
+  } else if (pv === "invd") {
+    h = hd("💼 Manage", "inv") + investDetail();
   } else if (pv === "github") {
     h =
       hd("GitHub") +
@@ -805,21 +815,28 @@ PA.spon = function () {
 PA.buy = function (v) {
   var p = v.split(":"),
     k = p[0],
-    px = S.px[k],
-    q = p[1] === "max" ? Math.floor(S.cash / px) : +p[1];
-  if (q < 1 || S.cash < px * q) {
+    q = p[1] === "max" ? Math.floor(S.cash / S.px[k]) : +p[1];
+  if (q < 1 || !buy(k, q)) {
     pmsg = "Not enough cash.";
     return;
   }
-  S.cash -= px * q;
-  S.hold[k] = (S.hold[k] || 0) + q;
   pmsg = "Bought " + q + ".";
+  save();
 };
-PA.sell = function (k) {
-  var n = S.hold[k] || 0;
-  S.cash += n * S.px[k];
-  S.hold[k] = 0;
-  pmsg = "Sold for $" + n * S.px[k] + ".";
+PA.sell = function (v) {
+  var p = v.split(":"),
+    held = S.hold[p[0]] || 0,
+    r = sell(p[0], p[1] ? +p[1] : held);
+  pmsg =
+    "Sold " +
+    r.shares +
+    " for $" +
+    fmtPx(r.proceeds) +
+    " (" +
+    (r.gain < 0 ? "-$" : "+$") +
+    fmtPx(Math.abs(r.gain)) +
+    ").";
+  save();
 };
 PA.dep = function (v) {
   S.cash -= +v;
