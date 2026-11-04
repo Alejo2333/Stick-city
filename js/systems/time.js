@@ -1,4 +1,5 @@
-function newDay() {
+function newDay(options) {
+  options = options || {};
   S.day++;
   S.t = 6;
   S.bank = Math.floor(S.bank * 1.002);
@@ -25,7 +26,17 @@ function newDay() {
         "\n\nKeep exploring, and check the local job boards as your skills improve.",
     );
   }
-  if (S.day % 30 === 0) setTimeout(birthday, 0);
+  if (options.suppressEvents) return;
+  hudDayT = HUD_DAY;
+  if (S.day % 30 === 0) {
+    setTimeout(function () {
+      birthday();
+    }, 0);
+  } else {
+    setTimeout(function () {
+      showRandomEvent("📅 A new day");
+    }, 0);
+  }
 }
 function adv(h) {
   S.t += h;
@@ -67,6 +78,10 @@ function blocked(it) {
   );
 }
 function act(it) {
+  if (it.gain && S.age < 16) {
+    say("Part-time work unlocks at age 16.");
+    return;
+  }
   if (it.sleep) {
     S.en = MAXE;
     hp(2);
@@ -144,7 +159,8 @@ function act(it) {
   render();
 }
 function render() {
-  var b = S.in;
+  var b = S.in,
+    place = ov.hidden ? null : holdPlace(ov);
   ov.innerHTML = "";
   var p = document.createElement("p");
   p.textContent = typeof b.greet === "function" ? b.greet() : b.greet;
@@ -206,6 +222,7 @@ function render() {
       d.appendChild(btn);
     });
   ov.appendChild(d);
+  if (place) place();
 }
 var ovT,
   fadeEl = document.getElementById("fade");

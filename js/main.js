@@ -9,10 +9,11 @@ function loop() {
     setView();
   }
   if (shake > 0) {
-    g.translate(
-      (Math.random() - 0.5) * shake,
-      (Math.random() - 0.5) * shake,
-    );
+    if (motionOk)
+      g.translate(
+        (Math.random() - 0.5) * shake,
+        (Math.random() - 0.5) * shake,
+      );
     shake = Math.max(0, shake - 0.8);
   }
   if (paused) {
@@ -20,6 +21,7 @@ function loop() {
     held = {};
   }
   if (S.in) {
+    setTalk(null);
     room();
   } else {
     var dx = 0,
@@ -97,6 +99,7 @@ function loop() {
         say("Park (🅿️ or C) to go inside " + n.n + ".");
       }
     } else if (!n) parkHint = null;
+    var near = null;
     if (n && !S.driving) enter(n);
     else if (!paused)
       for (var q = 0; q < NP.length; q++)
@@ -106,19 +109,29 @@ function loop() {
           NP[q].cool <= 0 &&
           Math.hypot(NP[q].x - S.x, NP[q].y - S.y) < 40
         ) {
-          talk(NP[q]);
+          near = NP[q];
           break;
         }
+    setTalk(near);
   }
   drawFx();
   if (flash > 0) {
-    g.fillStyle = "rgba(255,0,0," + flash / 48 + ")";
-    g.fillRect(0, 0, VW, VH);
+    if (motionOk) {
+      g.fillStyle = "rgba(255,0,0," + flash / 48 + ")";
+      g.fillRect(0, 0, VW, VH);
+    }
     flash--;
   }
   hud();
 }
 window.addEventListener("keydown", function (e) {
+  if (
+    e.target &&
+    (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) ||
+      e.target.isContentEditable) &&
+    e.key !== "Escape"
+  )
+    return;
   if (e.key === "Escape") {
     if (!phn.hidden) {
       phClose();
@@ -129,8 +142,7 @@ window.addEventListener("keydown", function (e) {
       return;
     }
     if (!bp.hidden) {
-      bp.hidden = true;
-      paused = false;
+      bagClose();
       return;
     }
     if (S.in) {
@@ -141,20 +153,28 @@ window.addEventListener("keydown", function (e) {
     return;
   }
   if (!mn.hidden || !phn.hidden) return;
-  if (e.key === "m" || e.key === "M") {
+  var key = keyName(e);
+  if (key === "m") {
+    sfx("click");
     menu(false);
     return;
   }
-  if (e.key === "i" || e.key === "I") {
+  if (key === "i") {
+    sfx("click");
     bag();
     return;
   }
-  if (e.key === "p" || e.key === "P") {
+  if (key === "p") {
+    sfx("click");
     phone("home");
     return;
   }
-  if ((e.key === "c" || e.key === "C") && !S.in && !paused) {
+  if (key === "c" && !S.in && !paused) {
     toggleDrive();
+    return;
+  }
+  if (key === "e" && !e.repeat && talkTarget && !paused) {
+    talkNow();
     return;
   }
   if (!S.in && !paused && !e.ctrlKey && !e.metaKey && !e.altKey) {
@@ -172,12 +192,18 @@ window.addEventListener("keydown", function (e) {
     }
   }
   if (S.in) return;
-  keys[e.key] = true;
+  keys[key] = true;
   if (e.key.indexOf("Arrow") === 0) e.preventDefault();
 });
 window.addEventListener("keyup", function (e) {
-  keys[e.key] = false;
+  keys[keyName(e)] = false;
 });
+// Letters are tracked in lowercase: Shift or Caps Lock can change e.key between
+// press and release, which would otherwise leave a key stuck down.
+function keyName(e) {
+  var k = e.key || "";
+  return k.length === 1 ? k.toLowerCase() : k;
+}
 // Floating joystick: touch anywhere in the lower-left zone to drop the
 // stick there, then drag. How far you push sets the walking speed.
 // It writes {x, y} into `held`, which menus already clear with held = {}.
@@ -237,31 +263,77 @@ joy.addEventListener("pointermove", function (e) {
   joy.addEventListener(t, joyEnd);
 });
 document.getElementById("menub").onclick = function () {
+  sfx("click");
   menu(false);
 };
-document.getElementById("bagb").onclick = bag;
+document.getElementById("bagb").onclick = function () {
+  sfx("click");
+  bag();
+};
 var carb = document.getElementById("carb"),
+  phb = document.getElementById("phb"),
+  phBadge = document.createElement("b"),
+  phUnread = 0,
   parkHint = null;
+phBadge.className = "mail-badge fab-badge";
+phBadge.hidden = true;
+phBadge.setAttribute("aria-hidden", "true");
+phb.appendChild(phBadge);
 function toggleDrive() {
   if (!S.vehicle) return;
+  sfx("click");
   S.driving = !S.driving;
   parkHint = null;
   say(S.driving ? "Back on the road." : "Parked. You're on foot.");
   save();
+  syncFab();
 }
 carb.onclick = toggleDrive;
-// Keep the park/drive button in sync with the garage state.
-setInterval(function () {
+// Keep the floating buttons in sync with the garage and the inbox.
+function syncFab() {
   carb.hidden = !S.vehicle;
   carb.textContent = S.driving ? "🅿️" : "🚗";
   carb.setAttribute(
     "aria-label",
     S.driving ? "Park your vehicle" : "Drive your vehicle",
   );
-}, 250);
-document.getElementById("phb").onclick = function () {
+  var n = unreadMailCount();
+  if (n === phUnread) return;
+  phBadge.hidden = !n;
+  phBadge.textContent = n > 9 ? "9+" : n;
+  phb.setAttribute("aria-label", n ? "Phone, " + n + " unread" : "Phone");
+  if (n > phUnread) {
+    phb.classList.remove("fab-bump");
+    void phb.offsetWidth;
+    phb.classList.add("fab-bump");
+  }
+  phUnread = n;
+}
+setInterval(syncFab, 250);
+phb.onclick = function () {
+  sfx("click");
   phone("home");
 };
+// Talking is a choice, so walking past someone doesn't interrupt the player.
+var talkb = document.getElementById("talkb"),
+  talkTarget = null,
+  talkTouch = matchMedia("(pointer: coarse)").matches;
+function setTalk(n) {
+  if (talkTarget === n) return;
+  talkTarget = n;
+  talkb.hidden = !n;
+  if (n)
+    talkb.textContent =
+      "💬 Talk to " + n.name + (talkTouch ? "" : " (E)");
+}
+function talkNow() {
+  var n = talkTarget;
+  if (!n) return;
+  setTalk(null);
+  sfx("click");
+  talk(n);
+}
+talkb.onclick = talkNow;
 var sc = 1,
   roomS = 1,
   roomX = 0,
@@ -453,6 +525,8 @@ function frame(now) {
 }
 // Startup runs last, once every file has loaded.
 genDrops();
-say("Welcome to Stick City. You have $100 and a dream.");
+lifeBoot();
+if (!S.life.created)
+  say("Welcome to Stick City. Start a life story or continue an existing save.");
 menu(true);
 requestAnimationFrame(frame);

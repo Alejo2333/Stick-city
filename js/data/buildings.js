@@ -324,12 +324,18 @@ var D = [
     "#e0ac69",
     "#000",
     ["Odds", "are odds"],
-    "“Welcome to Lucky Stick. The house always wins. Mostly.”",
+    function () {
+      return isAdult()
+        ? "“Welcome to Lucky Stick. The house always wins. Mostly.”"
+        : "“Nice try, kid. Come back when you’re 18.”";
+    },
     [
       {
         i: "🎰",
         t: "Casino floor",
         tag: "(slots, roulette, rocket, mega wheel…)",
+        req: isAdult,
+        lock: "18+",
         fn: function () {
           casinoFloor();
           return "Good luck.";
@@ -341,6 +347,8 @@ var D = [
         tag: "(45% win)",
         p: "$10",
         cost: 10,
+        req: isAdult,
+        lock: "18+",
         h: 0.25,
         fn: function () {
           if (Math.random() < 0.45) {
@@ -356,6 +364,8 @@ var D = [
         tag: "(45% win)",
         p: "$50",
         cost: 50,
+        req: isAdult,
+        lock: "18+",
         h: 0.25,
         fn: function () {
           if (Math.random() < 0.45) {
@@ -549,7 +559,11 @@ var D = [
     "#e0b080",
     "#222",
     ["No", "refunds"],
-    "“Everything here fell off a truck. A legal truck. Mostly.”",
+    function () {
+      return isAdult()
+        ? "“Everything here fell off a truck. A legal truck. Mostly.”"
+        : "“Nothing here for you, kid. Come back when you’re 18.”";
+    },
     [
       shop("bat", "Baseball bat", 25),
       shop("knife", "Knife", 60),

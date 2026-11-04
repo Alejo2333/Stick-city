@@ -72,6 +72,7 @@ var NP = NM.map(function (nm, i) {
   var s0 = RS[Math.floor(Math.random() * RS.length)];
   return {
     name: nm,
+    age: Math.max(18, S.age + Math.floor(Math.random() * 15) - 7),
     r: i < 3,
     role: ["", "", "", "beg", "job", "job", "shady"][i] || "",
     // Each resident has their own routine so they spread across town.
@@ -344,7 +345,7 @@ function talk(n) {
       return nm + " says: “I am " + state + ". " + feel + "”";
     },
   });
-  if (n.r) {
+  if (n.r && S.age >= 18) {
     it.push({
       i: "😉",
       t: "Flirt",
@@ -383,7 +384,7 @@ function talk(n) {
       t: "Ask " + nm + " out",
       p: "15 affection",
       req: function () {
-        return lvl(nm) >= 15 && !S.partner;
+        return S.age >= 18 && lvl(nm) >= 15 && !S.partner;
       },
       lock: "needs 15 affection",
       fn: function () {

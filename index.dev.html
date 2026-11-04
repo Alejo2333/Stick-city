@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Stick City — Development</title>
+    <script>
+      window.STICK_CITY_DEV = true;
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Patrick+Hand&display=swap"
+    />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/mobile.css" />
+    <link rel="stylesheet" href="css/ui.css" />
+    <link rel="stylesheet" href="css/casino.css" />
+    <link rel="stylesheet" href="css/dev.css" />
+    <link rel="stylesheet" href="css/motion.css" />
+  </head>
+  <body>
+    <main>
+      <div class="stage">
+        <canvas
+          id="c"
+          width="800"
+          height="520"
+          aria-label="Top-down town view, or the inside of a building"
+        ></canvas>
+        <div class="ov" id="ov" hidden></div>
+      </div>
+      <div class="screen" id="bp" hidden></div>
+      <div class="screen" id="mn" hidden></div>
+      <div class="joy" id="joy" aria-hidden="true">
+        <div class="joy-base"><div class="joy-knob"></div></div>
+      </div>
+      <p id="log" aria-live="polite"></p>
+      <button id="talkb" hidden></button>
+      <div class="fab">
+        <button id="menub" aria-label="Menu">☰</button>
+        <button id="bagb" aria-label="Backpack">🎒</button>
+        <button id="phb" aria-label="Phone">📱</button>
+        <button id="carb" aria-label="Park or drive your vehicle" hidden>
+          🅿️
+        </button>
+        <button id="zin" aria-label="Zoom in">+</button>
+        <button id="zout" aria-label="Zoom out">−</button>
+      </div>
+      <div id="zl" aria-hidden="true"></div>
+      <div id="fade" aria-hidden="true"></div>
+      <div id="phn" hidden></div>
+      <div id="sa" aria-hidden="true"></div>
+    </main>
+    <script src="js/core/state.js"></script>
+    <script src="js/data/buildings.js"></script>
+    <script src="js/world/map.js"></script>
+    <script src="js/world/cars.js"></script>
+    <script src="js/world/scenery.js"></script>
+    <script src="js/world/npcs.js"></script>
+    <script src="js/core/effects.js"></script>
+    <script src="js/ui/backpack.js"></script>
+    <script src="js/systems/market.js"></script>
+    <script src="js/ui/phone.js"></script>
+    <script src="js/ui/creator.js"></script>
+    <script src="js/world/pickups.js"></script>
+    <script src="js/systems/events.js"></script>
+    <script src="js/data/lifesim.js"></script>
+    <script src="js/systems/life.js"></script>
+    <script src="js/city/social.js"></script>
+    <script src="js/city/hub.js"></script>
+    <script src="js/city/property.js"></script>
+    <script src="js/city/minigames.js"></script>
+    <script src="js/city/casino.js"></script>
+    <script src="js/city/achievements.js"></script>
+    <script src="js/systems/time.js"></script>
+    <script src="js/render/world.js"></script>
+    <script src="js/render/player.js"></script>
+    <script src="js/render/hud.js"></script>
+    <script src="js/ui/menu.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/dev.js"></script>
+  </body>
+</html>

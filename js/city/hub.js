@@ -231,21 +231,24 @@ function cityReward(id) {
   cityMissions();
 }
 function cityScreen(title, description, builder, back) {
+  // The graveyard and family tree open from the death screen and return to it.
+  var ended = !!(S.life && S.life.ended);
   paused = true;
-  onTitle = false;
+  onTitle = ended;
   keys = {};
   held = {};
   mshow(title, [description], function (d) {
     builder(d);
     mbtn(d, "⬅️", "Back", function () {
-      if (back) back();
+      if (ended) lifeEndScreen();
+      else if (back) back();
       else if (cityBackTo) {
         var b = cityBackTo;
         closeMenu();
         enter(b);
       } else cityHub();
     });
-    mbtn(d, "▶️", "Return to city", closeMenu);
+    if (!ended) mbtn(d, "▶️", "Return to city", closeMenu);
   });
 }
 function cityHub() {
@@ -268,6 +271,7 @@ function cityHub() {
       fmtCash(S.cash),
     function (d) {
       mbtn(d, "📖", "Story chapters", cityStory);
+      mbtn(d, "🌱", "Life story & Age Up", lifeHubScreen);
       mbtn(d, "🎯", "Missions & rewards", cityMissions);
       mbtn(d, "📅", "Daily challenges", cityDaily);
       mbtn(d, "🧭", "Choose life path", cityCareer);

@@ -144,7 +144,7 @@
     transform 0.16s var(--ease-pop),
     box-shadow 0.16s ease;
   animation: sc-btn 0.42s var(--ease-pop) both;
-  animation-delay: calc(var(--i, 0) * 45ms + 140ms);
+  animation-delay: calc(min(var(--i, 0), 8) * 45ms + 140ms);
 }
 @keyframes sc-btn {
   from {
@@ -167,16 +167,18 @@
   transform: translateX(-130%);
   transition: transform 0.6s ease;
 }
-.screen .menu button:hover:not(:disabled)::after,
-.ov .menu button:hover:not(:disabled)::after {
-  transform: translateX(130%);
-}
-.screen .menu button:hover:not(:disabled) {
-  transform: translateY(-3px);
-  filter: none;
-  box-shadow:
-    0 7px 0 #86a8ea,
-    0 18px 30px rgba(3, 10, 26, 0.38);
+@media (hover: hover) {
+  .screen .menu button:hover:not(:disabled)::after,
+  .ov .menu button:hover:not(:disabled)::after {
+    transform: translateX(130%);
+  }
+  .screen .menu button:hover:not(:disabled) {
+    transform: translateY(-3px);
+    filter: none;
+    box-shadow:
+      0 7px 0 #86a8ea,
+      0 18px 30px rgba(3, 10, 26, 0.38);
+  }
 }
 .screen .menu button:active:not(:disabled) {
   transform: translateY(3px);
@@ -204,9 +206,11 @@
   border-radius: 11px;
   font-size: 22px;
 }
-.screen .menu button:hover:not(:disabled) .ico,
-.ov .menu button:hover:not(:disabled) .ico {
-  animation: sc-wiggle 0.5s ease;
+@media (hover: hover) {
+  .screen .menu button:hover:not(:disabled) .ico,
+  .ov .menu button:hover:not(:disabled) .ico {
+    animation: sc-wiggle 0.5s ease;
+  }
 }
 @keyframes sc-wiggle {
   30% {
@@ -253,7 +257,7 @@
 }
 .ov.fresh .menu button {
   animation: sc-btn 0.38s var(--ease-pop) both;
-  animation-delay: calc(var(--i, 0) * 35ms + 120ms);
+  animation-delay: calc(min(var(--i, 0), 8) * 35ms + 120ms);
 }
 .ov .menu button {
   position: relative;
@@ -268,12 +272,14 @@
     transform 0.15s var(--ease-pop),
     box-shadow 0.15s ease;
 }
-.ov .menu button:hover:not(:disabled) {
-  background: linear-gradient(180deg, #ffffff, #e6efff);
-  transform: translateY(-2px);
-  box-shadow:
-    0 5px 0 #7d9de0,
-    0 12px 22px rgba(0, 0, 30, 0.34);
+@media (hover: hover) {
+  .ov .menu button:hover:not(:disabled) {
+    background: linear-gradient(180deg, #ffffff, #e6efff);
+    transform: translateY(-2px);
+    box-shadow:
+      0 5px 0 #7d9de0,
+      0 12px 22px rgba(0, 0, 30, 0.34);
+  }
 }
 .ov .menu button:active:not(:disabled) {
   transform: translateY(2px);
@@ -318,8 +324,77 @@
   transition: none;
   background-color: rgba(60, 90, 170, 0.75);
 }
-.fab button:hover {
-  transform: scale(1.1);
+@media (hover: hover) {
+  .fab button:hover {
+    transform: scale(1.1);
+  }
+}
+.fab button {
+  position: relative;
+}
+.fab-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  margin: 0;
+  pointer-events: none;
+}
+.fab-badge[hidden] {
+  display: none;
+}
+.fab-bump {
+  animation: fab-bump 0.6s var(--ease-pop);
+}
+@keyframes fab-bump {
+  30% {
+    transform: scale(1.3) rotate(-8deg);
+  }
+  60% {
+    transform: scale(1.12) rotate(6deg);
+  }
+}
+/* Talk prompt */
+#talkb {
+  position: fixed;
+  left: 50%;
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  z-index: 6;
+  max-width: min(70vw, 340px);
+  padding: 10px 18px;
+  overflow: hidden;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  background: rgba(12, 22, 52, 0.86);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  color: #fff;
+  font: 600 16px var(--ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+  transform: translateX(-50%);
+  animation: talk-in 0.26s var(--ease-pop);
+}
+#talkb[hidden] {
+  display: none;
+}
+#talkb:active {
+  transform: translateX(-50%) scale(0.95);
+}
+#talkb:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+@keyframes talk-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px) scale(0.9);
+  }
+}
+@media (pointer: coarse) and (orientation: portrait) {
+  #talkb {
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
 }
 .fab button:active {
   transform: scale(0.9);
@@ -347,6 +422,15 @@
     transform: translate(-50%, 16px) scale(0.94);
   }
 }
+#log.out {
+  animation: sc-toast-out 0.22s ease forwards;
+}
+@keyframes sc-toast-out {
+  to {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+}
 /* Door transition */
 #fade {
   position: fixed;
@@ -372,9 +456,19 @@
   }
 }
 /* Phone */
-#phn {
+#phn,
+.ph-ghost {
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
+}
+.ph-page {
+  animation: ph-page 0.2s ease-out;
+}
+@keyframes ph-page {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
 }
 .ph {
   background: linear-gradient(145deg, #2c2c32, #0a0a0c);
@@ -389,22 +483,227 @@
     0 4px 10px rgba(0, 0, 0, 0.25);
   transition: transform 0.18s var(--ease-pop);
 }
-.phg button:hover span {
-  transform: translateY(-2px) scale(1.07);
+@media (hover: hover) {
+  .phg button:hover span {
+    transform: translateY(-2px) scale(1.07);
+  }
 }
 .phg button:active span {
   transform: scale(0.88);
+}
+.creator-progress {
+  margin: 0 0 9px;
+}
+.creator-progress-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 2px 3px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.creator-progress progress {
+  display: block;
+  width: 100%;
+  height: 12px;
+  accent-color: #7356d8;
+}
+.creator-home-card .creator-payout {
+  margin: 8px 0;
+}
+.creator-account {
+  overflow-wrap: anywhere;
+}
+.creator-input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 6px 0 8px;
+  padding: 10px 12px;
+  border: 1px solid #aeb8c7;
+  border-radius: 9px;
+  background: #fff;
+  color: #1b2430;
+  font: inherit;
+}
+.creator-input:focus {
+  outline: 3px solid rgba(47, 111, 228, 0.3);
+  border-color: #2f6fe4;
+}
+.creator-input[aria-invalid="true"] {
+  border-color: #b42318;
+}
+.card .creator-error {
+  display: block;
+  min-height: 1.2em;
+  margin: -4px 0 8px;
+  color: #b42318;
+  font-weight: 600;
+}
+.creator-alert {
+  border-left: 5px solid #b54708;
+  background: #fff0d6;
+}
+.creator-troll {
+  border-color: #b42318;
+  background: #ffe4e1;
+}
+.creator-suspension {
+  border-color: #8e1b1b;
+  background: #ffe0e0;
+}
+.creator-strike {
+  border-color: #c76b00;
+}
+.life-field {
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding: 2px 6px;
+  color: #fff;
+  font-weight: 600;
+  text-align: left;
+}
+.life-input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 5px 0 2px;
+  padding: 10px 12px;
+  border: 1px solid #aeb8c7;
+  border-radius: 9px;
+  background: #fff;
+  color: #1b2430;
+  font: inherit;
+}
+.life-input:focus {
+  outline: 3px solid rgba(47, 111, 228, 0.3);
+  border-color: #2f6fe4;
+}
+.life-error {
+  grid-column: 1 / -1;
+  min-height: 1.2em;
+  padding: 0 6px;
+  color: #ffd2ca;
+  font-weight: 600;
+  text-align: left;
+}
+.life-stat {
+  grid-column: 1 / -1;
+  margin: 0 3px 8px;
+  color: #fff;
+  text-align: left;
+}
+.life-stat-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 3px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.life-stat progress {
+  display: block;
+  width: 100%;
+  height: 12px;
+  accent-color: var(--life-progress, #49a5ff);
+}
+.life-feed-age {
+  grid-column: 1 / -1;
+  margin: 12px 4px 2px;
+  color: #fff;
+  font-size: 1.1em;
+  text-align: left;
+}
+.life-feed-entry {
+  grid-column: 1 / -1;
+  margin: 2px 4px;
+  padding: 8px 10px;
+  border-left: 3px solid rgba(255, 255, 255, 0.55);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.screen p.life-feed-entry {
+  text-align: left;
+}
+.creator-result {
+  position: sticky;
+  top: -8px;
+  z-index: 2;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.18);
+}
+.phg button {
+  min-width: 0;
+}
+.phg button {
+  overflow-wrap: anywhere;
 }
 .pb {
   transition:
     transform 0.12s ease,
     filter 0.12s ease;
 }
-.pb:hover:not(:disabled) {
-  filter: brightness(1.08);
+@media (hover: hover) {
+  .pb:hover:not(:disabled) {
+    filter: brightness(1.08);
+  }
 }
 .pb:active:not(:disabled) {
   transform: scale(0.97);
+}
+/* Blurring the animated menu background is costly on phones. */
+@media (pointer: coarse) {
+  .screen-panel {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background:
+      linear-gradient(
+        160deg,
+        rgba(255, 255, 255, 0.18),
+        rgba(255, 255, 255, 0.03) 45%
+      ),
+      rgba(9, 18, 46, 0.8);
+  }
+}
+/* Exit copies made by closeFx: freeze the intro animations, then fade out. */
+.closing,
+.closing *,
+.closing .screen-panel,
+.closing h1,
+.closing p,
+.closing .menu button,
+.closing .ph,
+.screen.closing::before,
+.screen.closing::after {
+  animation: none;
+  pointer-events: none;
+}
+.screen.closing,
+.ph-ghost.closing {
+  animation: sc-close 0.18s ease forwards;
+}
+.closing .screen-panel {
+  animation: sc-panel-out 0.16s ease-in forwards;
+}
+.closing .ph {
+  animation: ph-down 0.2s ease-in forwards;
+}
+@keyframes sc-close {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes sc-panel-out {
+  to {
+    transform: translateY(10px) scale(0.97);
+  }
+}
+@keyframes ph-down {
+  to {
+    transform: translateY(60%);
+  }
 }
 @media (max-height: 520px) {
   .screen .menu .ico {

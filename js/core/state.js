@@ -4,7 +4,8 @@ var VW = 800,
   H = 3600,
   MAXE = 25,
   R = [600, 1800, 3000],
-  KEY = "stickTownSave2";
+  DEV_MODE = window.STICK_CITY_DEV === true,
+  KEY = DEV_MODE ? "stickCityDevSave2" : "stickTownSave2";
 var cv = document.getElementById("c"),
   g = cv.getContext("2d"),
   ov = document.getElementById("ov");
@@ -86,6 +87,8 @@ var S = {
   seasonsSeen: {},
   businessUpgrades: {},
   casino: { plays: 0, won: 0, lost: 0, best: 0 },
+  cr: {},
+  life: {},
 };
 var SK = Object.keys(S);
 S.ph = 0;
@@ -104,6 +107,7 @@ S.seasonsSeen[
     Math.floor((S.day - 1) / 15) % 4
   ]
 ] = 1;
+var saveWarned = false;
 function save() {
   S.moneyPeak = Math.max(S.moneyPeak || 0, S.cash + S.bank);
   try {
@@ -112,7 +116,12 @@ function save() {
       o[k] = S[k];
     });
     localStorage.setItem(KEY, JSON.stringify(o));
-  } catch (e) {}
+    saveWarned = false;
+  } catch (e) {
+    console.error("Could not save the game:", e);
+    if (!saveWarned) say("Your progress could not be saved in this browser.");
+    saveWarned = true;
+  }
 }
 function need(s, i, c, k) {
   var f = function () {
@@ -164,6 +173,10 @@ function wp() {
 function lvl(n) {
   return S.lv[n] || 0;
 }
+// Gambling and weapons wait until 18.
+function isAdult() {
+  return S.age >= 18;
+}
 function doneToday(k) {
   return S.done[k] === S.day;
 }
@@ -179,9 +192,11 @@ function shop(id, t, pr) {
     cost: pr,
     give: id,
     req: function () {
-      return !S.inv[id];
+      return isAdult() && !S.inv[id];
     },
-    lock: "owned",
+    get lock() {
+      return isAdult() ? "owned" : "18+";
+    },
     m:
       "You bought a " +
       ITEMS[id].n.toLowerCase() +

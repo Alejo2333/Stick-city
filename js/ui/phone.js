@@ -91,16 +91,11 @@ function phoneOld(v) {
             go("Bought " + q + " " + a[2] + ".");
           });
         });
-        mbtn(
-          d,
-          "💵",
-          "Sell all " + a[2] + " (+$" + n * px + ")",
-          function () {
-            S.cash += n * px;
-            S.hold[k] = 0;
-            go("Sold for $" + n * px + ".");
-          },
-        ).disabled = !n;
+        mbtn(d, "💵", "Sell all " + a[2] + " (+$" + n * px + ")", function () {
+          S.cash += n * px;
+          S.hold[k] = 0;
+          go("Sold for $" + n * px + ".");
+        }).disabled = !n;
       });
       mbtn(d, "⬅️", "Back", function () {
         phone("home");
@@ -125,6 +120,7 @@ function phoneOld(v) {
 }
 var phn = document.getElementById("phn"),
   pv = "home",
+  phRenderedView = null,
   pc = "",
   pmsg = "",
   typing = {},
@@ -178,7 +174,59 @@ function once(k) {
   return 1;
 }
 function contacts() {
-  return ["Mom"].concat(S.partner ? [S.partner] : []);
+  var names = ["Mom"];
+  if (S.life && S.life.created) {
+    S.life.people.forEach(function (person) {
+      if (
+        person.alive &&
+        (person.role === "parent" ||
+          person.role === "child" ||
+          person.role === "sibling") &&
+        names.indexOf(person.name) < 0
+      )
+        names.push(person.name);
+    });
+  }
+  var partner =
+    S.life &&
+    S.life.people.filter(function (p) {
+      return p.name === S.partner;
+    })[0];
+  if (
+    S.partner &&
+    S.age >= 18 &&
+    (!partner || partner.age >= 18) &&
+    names.indexOf(S.partner) < 0
+  )
+    names.push(S.partner);
+  return names;
+}
+function canMessageRomantically(contact) {
+  if (!S.partner || contact !== S.partner || S.age < 18) return false;
+  var partner =
+    S.life &&
+    S.life.people.filter(function (p) {
+      return p.name === contact;
+    })[0];
+  return !partner || partner.age >= 18;
+}
+function messageChoices(contact) {
+  if (contact === "Mom") return MOMQ;
+  var person =
+    S.life &&
+    S.life.people.filter(function (p) {
+      return p.name === contact;
+    })[0];
+  if (
+    person &&
+    (person.role === "parent" ||
+      person.role === "child" ||
+      person.role === "sibling")
+  )
+    return ["How are you?", "Can we spend time together?", "Thinking of you"];
+  return canMessageRomantically(contact)
+    ? PARQ
+    : ["How are you?", "Want to meet up?", "Thanks for being a friend"];
 }
 function unreadMailCount() {
   return S.mail.filter(function (m) {
@@ -219,15 +267,7 @@ function ensureMailbox() {
 }
 function cmp(a, b, o) {
   var r =
-    o === "+"
-      ? a + b
-      : o === "−"
-        ? a - b
-        : o === "×"
-          ? a * b
-          : b
-            ? a / b
-            : 0;
+    o === "+" ? a + b : o === "−" ? a - b : o === "×" ? a * b : b ? a / b : 0;
   return Math.round(r * 1e8) / 1e8;
 }
 function phRender() {
@@ -298,8 +338,19 @@ function phRender() {
       fmtCash(S.cash) +
       " · Happiness: " +
       S.hap +
-      "/100</div></div></div>" +
+      "/100</div>" +
+      (S.life && S.life.created
+        ? '<div style="margin-top:5px">' +
+          esc(S.life.name || "Resident") +
+          " · age " +
+          S.age +
+          " · " +
+          esc(lifeLabel(lifeStage(S.age))) +
+          "</div>"
+        : '<div style="margin-top:5px">Start a life story at birth, or continue an older save.</div>') +
+      "</div></div>" +
       [
+        ["life", "🌱 Life story & Age Up"],
         ["story", "📖 Story chapters"],
         ["missions", "🎯 Missions & rewards"],
         ["daily", "📅 Daily challenges"],
@@ -328,10 +379,7 @@ function phRender() {
           return pb(
             "th",
             c,
-            "<b>" +
-              esc(c) +
-              "</b><br>" +
-              esc(m ? m.t : "No messages yet"),
+            "<b>" + esc(c) + "</b><br>" + esc(m ? m.t : "No messages yet"),
             "w",
           );
         })
@@ -386,11 +434,7 @@ function phRender() {
         .slice(-6)
         .map(function (b) {
           return (
-            '<div class="bub' +
-            (b.me ? " me" : "") +
-            '">' +
-            esc(b.t) +
-            "</div>"
+            '<div class="bub' + (b.me ? " me" : "") + '">' + esc(b.t) + "</div>"
           );
         })
         .join("") +
@@ -399,7 +443,7 @@ function phRender() {
           esc(pc) +
           ' is typing"><i></i><i></i><i></i></div>'
         : "") +
-      (pc === "Mom" ? MOMQ : PARQ)
+      messageChoices(pc)
         .map(function (q, i) {
           return pb("send", i, esc(q), "", !!typing[pc]);
         })
@@ -471,7 +515,7 @@ function phRender() {
       "<br>Bank $" +
       S.bank +
       "<br><b>Net worth $" +
-      (S.cash + S.bank + invested()) +
+      netWorth() +
       "</b></div>" +
       pb("dep", 50, "Deposit $50", "g", S.cash < 50) +
       pb("dep", 500, "Deposit $500", "g", S.cash < 500) +
@@ -530,9 +574,7 @@ function phRender() {
       " · birthday in " +
       (30 - (S.day % 30)) +
       " days<br>Wanted: " +
-      (S.heat >= 0.3
-        ? "★".repeat(Math.min(5, Math.ceil(S.heat)))
-        : "no") +
+      (S.heat >= 0.3 ? "★".repeat(Math.min(5, Math.ceil(S.heat))) : "no") +
       "<br>Karma " +
       S.k +
       (S.partner ? "<br>Partner: " + esc(S.partner) : "") +
@@ -543,6 +585,7 @@ function phRender() {
       pb("snd", "", muted ? "🔇 Sound: off" : "🔊 Sound: on") +
       pb("sv", "", "💾 Save game");
   }
+  var scroll = phScrollSnapshot();
   el.innerHTML =
     '<div class="phb"><span>' +
     t +
@@ -551,6 +594,26 @@ function phRender() {
     '%</span></div><div class="phc">' +
     h +
     '</div><div class="phh" data-a="home"><i></i></div>';
+  phRestoreScroll(scroll);
+}
+function phScrollSnapshot() {
+  var el = document.getElementById("phs"),
+    content = el && el.querySelector(".phc");
+  return {
+    view: phRenderedView,
+    top: content ? content.scrollTop : 0,
+  };
+}
+function phRestoreScroll(snapshot) {
+  var el = document.getElementById("phs"),
+    content = el && el.querySelector(".phc");
+  if (content) {
+    content.scrollTop = snapshot.view === pv ? snapshot.top : 0;
+    // Opening the phone has its own slide; only app changes get this one.
+    if (snapshot.view && snapshot.view !== pv)
+      content.classList.add("ph-page");
+  }
+  phRenderedView = pv;
 }
 function phone() {
   if (!phn.hidden) return;
@@ -560,13 +623,14 @@ function phone() {
   bp.hidden = true;
   ensureMailbox();
   pv = "home";
+  phRenderedView = null;
   pmsg = "";
-  phn.innerHTML =
-    '<div class="ph"><div class="phs" id="phs"></div></div>';
+  phn.innerHTML = '<div class="ph"><div class="phs" id="phs"></div></div>';
   phn.hidden = false;
   phRender();
 }
 function phClose() {
+  closeFx(phn, "ph-ghost");
   phn.hidden = true;
   cityHubFromPhone = false;
   paused = false;
@@ -588,6 +652,7 @@ var cityHubFromPhone = false,
 PA.hubgo = function (v) {
   cityBackTo = null;
   var pages = {
+    life: lifeHubScreen,
     story: cityStory,
     shops: cityShops,
     neighbors: cityNeighborhood,
@@ -639,9 +704,20 @@ PA.send = function (i) {
   i = +i;
   var c = pc,
     g = (S.th[c] = S.th[c] || []),
-    r = "";
+    r = "",
+    person =
+      S.life &&
+      S.life.people.filter(function (p) {
+        return p.name === c;
+      })[0],
+    familyContact =
+      person &&
+      (person.role === "parent" ||
+        person.role === "child" ||
+        person.role === "sibling"),
+    romanticContact = canMessageRomantically(c);
   if (typing[c]) return;
-  g.push({ me: 1, t: (c === "Mom" ? MOMQ : PARQ)[i] });
+  g.push({ me: 1, t: messageChoices(c)[i] });
   if (c === "Mom") {
     if (i === 0) {
       r = "Eating well? Call me more!";
@@ -655,22 +731,38 @@ PA.send = function (i) {
       r = "Love you more! ❤️";
       if (once("m2")) hp(3);
     }
-  } else if (i === 0) {
+  } else if (familyContact) {
+    r =
+      i === 0
+        ? "I am doing well. Thanks for checking in!"
+        : i === 1
+          ? "That sounds lovely. Let's make time for it."
+          : "Thinking of you too!";
+    if (once("life-family-" + c + "-" + i)) {
+      if (person) person.affection = Math.min(100, (person.affection || 0) + 1);
+      if (person && person.npc) S.lv[c] = person.affection;
+      hp(1);
+    }
+  } else if (i === 0 && romanticContact) {
     r = "Aww, miss you too!";
     if (once("p0")) {
       S.lv[c] = lvl(c) + 1;
       hp(2);
     }
-  } else if (i === 1) {
+  } else if (i === 1 && romanticContact) {
     r = "Yes! See you at the cafe.";
     if (once("p1")) {
       S.lv[c] = lvl(c) + 2;
       hp(2);
     }
-  } else if (Math.random() < 0.5 + S.cha * 0.02) {
+  } else if (
+    i === 2 &&
+    romanticContact &&
+    Math.random() < 0.5 + S.cha * 0.02
+  ) {
     r = "Stop it, you! 😊";
     S.lv[c] = lvl(c) + 1;
-  } else r = "Lol ok.";
+  } else r = i === 1 ? "Sure, let's catch up soon." : "Thanks for reaching out!";
   typing[c] = true;
   if (g.length > 12) g.splice(0, g.length - 12);
   adv(0.1);
@@ -758,8 +850,7 @@ PA.key = function (k) {
     if (c.cur.indexOf(".") < 0) c.cur += ".";
   } else if (k === "C") calc = { a: null, op: "", cur: "0", fresh: 0 };
   else {
-    if (c.op && !c.fresh)
-      c.cur = String(cmp(c.a, parseFloat(c.cur), c.op));
+    if (c.op && !c.fresh) c.cur = String(cmp(c.a, parseFloat(c.cur), c.op));
     c.a = parseFloat(c.cur);
     c.op = k === "=" ? "" : k;
     c.fresh = 1;
@@ -779,7 +870,8 @@ phn.addEventListener("click", function (e) {
   if (e.target === phn) return phClose();
   var b = e.target.closest("[data-a]");
   if (!b || b.disabled || !PA[b.dataset.a]) return;
-  PA[b.dataset.a](b.dataset.v);
+  pmsg = "";
+  var result = PA[b.dataset.a](b.dataset.v);
   sfx("click");
-  if (!phn.hidden) phRender();
+  if (!phn.hidden && result !== false) phRender();
 });

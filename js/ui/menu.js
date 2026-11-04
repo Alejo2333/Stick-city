@@ -31,7 +31,41 @@ function keepStill(box, panel, key) {
     panel.classList.add("still");
   box.dataset.k = key;
 }
+// The game reads `hidden` synchronously, so closing flips it right away and
+// a throwaway copy plays the exit animation on top.
+function closeFx(box, cls) {
+  if (box.hidden || !motionOk) return;
+  var c = box.cloneNode(true);
+  c.removeAttribute("id");
+  c.querySelectorAll("[id]").forEach(function (el) {
+    el.removeAttribute("id");
+  });
+  c.classList.add("closing");
+  if (cls) c.classList.add(cls);
+  c.setAttribute("aria-hidden", "true");
+  c.inert = true;
+  box.parentNode.appendChild(c);
+  c.scrollTop = box.scrollTop;
+  setTimeout(function () {
+    c.remove();
+  }, 240);
+}
+// Snapshots scroll and focus so re-rendering a page leaves the player in place.
+function holdPlace(box) {
+  var at = [].indexOf.call(
+      box.querySelectorAll("button"),
+      document.activeElement,
+    ),
+    top = box.scrollTop;
+  return function () {
+    box.scrollTop = top;
+    var b = box.querySelectorAll("button")[at];
+    if (!b || b.disabled) b = box.querySelector("button:not(:disabled)");
+    if (b) b.focus({ preventScroll: true });
+  };
+}
 function mshow(title, lines, build) {
+  var place = !mn.hidden && mn.dataset.k === title ? holdPlace(mn) : null;
   mn.innerHTML = "";
   var panel = document.createElement("div");
   panel.className = "screen-panel";
@@ -66,10 +100,12 @@ function mshow(title, lines, build) {
     mn.appendChild(github);
   }
   mn.hidden = false;
+  if (place) return place();
   var f = mn.querySelector("button:not(:disabled)");
   if (f) f.focus();
 }
 function closeMenu() {
+  closeFx(mn);
   mn.hidden = true;
   cityHubFromPhone = false;
   cityBackTo = null;
@@ -95,6 +131,7 @@ function sub(t, title, lines) {
   });
 }
 function menu(t) {
+  if (t && S.life && S.life.ended) return lifeEndScreen();
   paused = true;
   onTitle = t;
   cityBackTo = null;
@@ -107,15 +144,31 @@ function menu(t) {
     t ? "Stick City" : "Paused",
     t
       ? [
-          "A living stick-figure city. Work, explore, buy a home, drive, and create your story. Open the Life Hub app on your phone!",
+          sv2
+            ? S.life && S.life.created
+              ? "Continue " +
+                S.life.name +
+                "'s story at age " +
+                S.age +
+                "."
+              : "Continue your existing city save at age " + S.age + "."
+            : "Create a life story, explore the city, and shape your future. Your age and memories will grow year by year.",
         ]
       : ["Day " + S.day + ", " + hhmm() + ". $" + S.cash + " in cash."],
     function (d) {
       mbtn(
         d,
         "▶",
-        t ? (sv2 ? "Continue" : "Start") : "Resume",
-        closeMenu,
+        t
+          ? sv2
+            ? "Continue"
+            : "Create a life"
+          : "Resume",
+        t && !sv2
+          ? lifeCharacterCreate
+          : t && sv2 && !(S.life && S.life.created)
+            ? lifeContinueLegacy
+            : closeMenu,
       );
       if (!t)
         mbtn(d, "📊", "Your stats", function () {
@@ -183,7 +236,7 @@ function menu(t) {
       );
       mbtn(d, "❓", "How to play", function () {
         sub(t, "How to play", [
-          "Walk with the arrow keys or WASD, or on a touchscreen drag the joystick in the lower-left corner. Walk into a door to go inside.",
+          "Walk with the arrow keys or WASD, or on a touchscreen drag the joystick in the lower-left corner. Walk into a door to go inside. Near someone, press E or tap Talk to start a conversation.",
           "Zoom with the mouse wheel, the + and − keys (0 resets), the + / − buttons, or by pinching the screen.",
           "M opens this menu, I your backpack, P your phone. Esc leaves a building or closes a window.",
           "Jobs pay more as your stats rise, and karma decides which jobs you can take.",

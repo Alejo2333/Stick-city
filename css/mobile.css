@@ -88,7 +88,8 @@ body.in #zl {
     font-size: 14px;
   }
 }
-#phn {
+#phn,
+.ph-ghost {
   position: fixed;
   inset: 0;
   z-index: 12;

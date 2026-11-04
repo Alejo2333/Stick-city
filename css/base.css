@@ -101,9 +101,11 @@ canvas {
   padding: 7px 9px;
   cursor: pointer;
 }
-.menu button:hover:not(:disabled) {
-  background: #bfe0ff;
-  border-color: #0a1a4d;
+@media (hover: hover) {
+  .menu button:hover:not(:disabled) {
+    background: #bfe0ff;
+    border-color: #0a1a4d;
+  }
 }
 .menu button:focus-visible {
   outline: 3px solid #fff;
@@ -221,10 +223,12 @@ canvas {
     box-shadow 0.12s ease,
     filter 0.12s ease;
 }
-.screen .menu button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(3, 10, 26, 0.2);
-  filter: brightness(1.03);
+@media (hover: hover) {
+  .screen .menu button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(3, 10, 26, 0.2);
+    filter: brightness(1.03);
+  }
 }
 .screen .menu button:active:not(:disabled) {
   transform: translateY(0);

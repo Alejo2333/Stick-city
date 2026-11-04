@@ -1,5 +1,6 @@
 var AC = null,
-  muted = false;
+  muted = false,
+  motionOk = !matchMedia("(prefers-reduced-motion: reduce)").matches;
 try {
   muted = localStorage.getItem("stickCityMute") === "1";
 } catch (e) {}

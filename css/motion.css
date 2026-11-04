@@ -7,11 +7,42 @@
   .screen .menu button,
   .ov.fresh,
   .ov.fresh .menu button,
+  .screen .menu button:hover:not(:disabled) .ico,
+  .ov .menu button:hover:not(:disabled) .ico,
   #log.pop,
+  #log.out,
   #fade.go,
+  #talkb,
   .cz-stage,
   .cz-stage *,
+  .fab-bump,
+  .ph-page,
   .ph {
     animation: none;
+  }
+  .screen .menu button,
+  .ov .menu button,
+  .screen .menu button::after,
+  .ov .menu button::after,
+  .fab button,
+  .joy-knob,
+  .phg span,
+  .pb {
+    transition: none;
+  }
+  .screen .menu button:hover:not(:disabled)::after,
+  .ov .menu button:hover:not(:disabled)::after {
+    transform: translateX(-130%);
+  }
+  .screen .menu button:hover:not(:disabled),
+  .screen .menu button:active:not(:disabled),
+  .ov .menu button:hover:not(:disabled),
+  .ov .menu button:active:not(:disabled),
+  .fab button:hover,
+  .fab button:active,
+  .phg button:hover span,
+  .phg button:active span,
+  .pb:active:not(:disabled) {
+    transform: none;
   }
 }

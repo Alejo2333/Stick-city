@@ -1,11 +1,10 @@
-// CASINO: games from safe-ish to wild. Every game keeps a house edge.
+// CASINO: games from safe-ish to wild, all with fair expected returns.
 var casinoBet = 10,
   casinoMsg = "",
   casinoFx = "",
   casinoSnd = "",
   casinoView = null,
   casinoBusy = false,
-  czMotion = !matchMedia("(prefers-reduced-motion: reduce)").matches,
   BETS = [
     10,
     50,
@@ -55,7 +54,12 @@ function casinoPlay(mult, shown) {
     sfx("bad");
     return;
   }
-  var net = Math.floor(bet * mult) - bet;
+  if (DEV_MODE) mult *= devCasinoPayoutMultiplier;
+  var payout = bet * mult,
+    paid = Math.floor(payout);
+  // Randomized rounding keeps fractional payouts fair without fractional cash.
+  if (Math.random() < payout - paid) paid++;
+  var net = paid - bet;
   S.cash += net;
   S.casino.plays++;
   adv(0.1);
@@ -70,7 +74,7 @@ function casinoPlay(mult, shown) {
       "+" +
       fmtCash(net) +
       " (" +
-      mult +
+      Number(mult.toFixed(2)) +
       "×)";
     casinoFx = mult >= 10 ? "big" : "win";
     casinoSnd = mult >= 10 ? "up" : "coin";
@@ -113,7 +117,7 @@ function czEl(tag, cls, txt, parent) {
   return e;
 }
 function czMs(ms) {
-  return czMotion ? ms : 150;
+  return motionOk ? ms : 150;
 }
 // Plays one round: the bet settles up front (so leaving mid-spin can't
 // dodge a loss), then anim(done) runs on the stage. done(paint) keeps
@@ -198,10 +202,10 @@ function casinoFloor() {
       " · Biggest win " +
       fmtCash(c.best),
     function (d) {
-      mbtn(d, "🪙", "Coin flip — 2× (safe-ish)", casinoCoin);
+      mbtn(d, "🪙", "Coin flip — 2× (50/50)", casinoCoin);
       mbtn(d, "🃏", "High card vs dealer — 2×", casinoCard);
-      mbtn(d, "🎡", "Roulette — 2× or 36×", casinoRoulette);
-      mbtn(d, "🎰", "Slots — jackpot 1000×", casinoSlots);
+      mbtn(d, "🎡", "Roulette — 2× or 37×", casinoRoulette);
+      mbtn(d, "🎰", "Slots — jackpot 1635×", casinoSlots);
       mbtn(d, "🚀", "Rocket — cash out up to 100×", casinoRocket);
       mbtn(d, "🌀", "Mega Wheel — 1000× or nothing", casinoWheel);
     },
@@ -221,11 +225,14 @@ function casinoCoin() {
   }
   casinoScreen(
     "🪙 Coin Flip",
-    "Call it. 48% to double your bet.",
+    "Call it. " +
+      Math.round((DEV_MODE ? devCasinoWinChance : 0.5) * 100) +
+      "% to double your bet.",
     function (d, again, stage) {
       ["Heads", "Tails"].forEach(function (side) {
         mbtn(d, "🪙", side, function () {
-          var win = Math.random() < 0.48,
+          var win = Math.random() <
+              (DEV_MODE ? devCasinoWinChance : 0.5),
             land = win ? side : side === "Heads" ? "Tails" : "Heads";
           casinoRound(
             stage,
@@ -300,7 +307,7 @@ function casinoCard() {
   }
   casinoScreen(
     "🃏 High Card",
-    "Beat the dealer's card to win 2×. Ties go to the house.",
+    "Beat the dealer's card to win 2×. Ties push.",
     function (d, again, stage) {
       mbtn(d, "🃏", "Draw", function () {
         var cards = [draw(), draw()],
@@ -311,7 +318,7 @@ function casinoCard() {
           again,
           function () {
             casinoPlay(
-              you > dl ? 2 : 0,
+              you > dl ? 2 : you === dl ? 1 : 0,
               "You " + name(you) + " vs dealer " + name(dl),
             );
           },
@@ -413,42 +420,42 @@ function casinoRoulette() {
     });
   casinoScreen(
     "🎡 Roulette",
-    "37 pockets. Red or black pays 2×, a single number pays 36×.",
+    "37 pockets. Red or black pays 2× (green 0 pushes); a single number pays 37×.",
     function (d, again, stage) {
       [
         [
           "🔴",
           "Red — 2×",
           function (n) {
-            return RED.indexOf(n) >= 0 ? 2 : 0;
+            return n === 0 ? 1 : RED.indexOf(n) >= 0 ? 2 : 0;
           },
         ],
         [
           "⚫",
           "Black — 2×",
           function (n) {
-            return n && RED.indexOf(n) < 0 ? 2 : 0;
+            return n === 0 ? 1 : RED.indexOf(n) < 0 ? 2 : 0;
           },
         ],
         [
           "🟢",
-          "Green 0 — 36×",
+          "Green 0 — 37×",
           function (n) {
-            return n === 0 ? 36 : 0;
+            return n === 0 ? 37 : 0;
           },
         ],
         [
           "7️⃣",
-          "Lucky 7 — 36×",
+          "Lucky 7 — 37×",
           function (n) {
-            return n === 7 ? 36 : 0;
+            return n === 7 ? 37 : 0;
           },
         ],
         [
           "🍀",
-          "Lucky 17 — 36×",
+          "Lucky 17 — 37×",
           function (n) {
-            return n === 17 ? 36 : 0;
+            return n === 17 ? 37 : 0;
           },
         ],
       ].forEach(function (o) {
@@ -481,7 +488,14 @@ function casinoSlots() {
       ["💎", 10],
       ["7️⃣", 5],
     ],
-    PAY = { "🍒": 3, "🍋": 5, "🔔": 25, "💎": 100, "7️⃣": 1000 };
+    PAY = { "🍒": 3, "🍋": 5, "🔔": 25, "💎": 100, "7️⃣": 1635 };
+  if (DEV_MODE) {
+    var otherWeight = 100 - devCasinoSlotJackpotChance * 100;
+    SYM.slice(0, -1).forEach(function (symbol) {
+      symbol[1] = (symbol[1] / 95) * otherWeight;
+    });
+    SYM[SYM.length - 1][1] = devCasinoSlotJackpotChance * 100;
+  }
   function reel() {
     var r = Math.random() * 100;
     for (var i = 0; i < SYM.length; i++) {
@@ -514,7 +528,7 @@ function casinoSlots() {
   }
   casinoScreen(
     "🎰 Slots",
-    "Three of a kind: 🍒 3× · 🍋 5× · 🔔 25× · 💎 100× · 7️⃣ 1000×. Any pair returns half your bet.",
+    "Three of a kind: 🍒 3× · 🍋 5× · 🔔 25× · 💎 100× · 7️⃣ 1635×. Any pair returns half your bet.",
     function (d, again, stage) {
       mbtn(d, "🎰", "Spin", function () {
         var r = [reel(), reel(), reel()],
@@ -533,7 +547,7 @@ function casinoSlots() {
               "[ " +
                 r.join(" ") +
                 " ]" +
-                (mult === 1000 ? " JACKPOT!!!" : ""),
+                (mult === 1635 ? " JACKPOT!!!" : ""),
             );
           },
           function (done) {
@@ -606,12 +620,23 @@ function casinoRocket() {
         mbtn(
           d,
           "🚀",
-          "Cash out at " + t + "× (" + Math.round(95 / t) + "% chance)",
+          "Cash out at " +
+            t +
+            "× (" +
+            Math.min(
+              100,
+              (100 * (DEV_MODE ? devCasinoRocketOddsMultiplier : 1)) / t,
+            ).toFixed(1) +
+            "% chance)",
           function () {
-            // Chance the rocket reaches t is 0.95 / t.
+            // In dev mode, scale the target reach chance by the test multiplier.
             var crash = Math.max(
                 1,
-                Math.floor((0.95 / (1 - Math.random())) * 100) / 100,
+                Math.floor(
+                  ((DEV_MODE ? devCasinoRocketOddsMultiplier : 1) /
+                    (1 - Math.random())) *
+                    100,
+                ) / 100,
               ),
               ok = crash >= t,
               stop = ok ? t : crash;
@@ -636,7 +661,7 @@ function casinoRocket() {
                   K = Math.log(100) / 6000,
                   t0 = performance.now();
                 (function step(now) {
-                  var m = czMotion
+                  var m = motionOk
                     ? Math.min(stop, Math.exp((now - t0) * K))
                     : stop;
                   at(m);
@@ -656,14 +681,14 @@ function casinoRocket() {
   );
 }
 function casinoWheel() {
-  // Weights out of 100: about 75% lose it all, 1 in 12,500 hits 1000×.
+  // Weights out of 100; weighted payout is exactly 100% of the stake.
   var SEG = [
-      [0, 74.692],
+      [0, 74.6815],
       [1.5, 15],
       [3, 8],
       [10, 2],
       [50, 0.3],
-      [1000, 0.008],
+      [1000, 0.0185],
     ],
     // Wheel art only: the odds come from SEG, not slice sizes.
     COL = {
@@ -683,18 +708,35 @@ function casinoWheel() {
     });
   casinoScreen(
     "🌀 Mega Wheel",
-    "Most spins lose everything. Some pay 1.5×, 3× or 10×. Rarely 50×. Once in a blue moon: 1000×.",
+    "Most spins lose everything. Some pay 1.5×, 3× or 10×. Rarely 50×. A rare 1000× jackpot.",
     function (d, again, stage) {
       mbtn(d, "🌀", "Spin the Mega Wheel", function () {
         var r = Math.random() * 100,
           m = 0,
           spots = [];
-        for (var i = 0; i < SEG.length; i++) {
-          if (r < SEG[i][1]) {
-            m = SEG[i][0];
-            break;
+        if (DEV_MODE) {
+          if (Math.random() < devCasinoWheelWinChance) {
+            var total = SEG.reduce(function (sum, segment) {
+              return sum + (segment[0] ? segment[1] : 0);
+            }, 0);
+            r = Math.random() * total;
+            for (var j = 0; j < SEG.length; j++) {
+              if (!SEG[j][0]) continue;
+              if (r < SEG[j][1]) {
+                m = SEG[j][0];
+                break;
+              }
+              r -= SEG[j][1];
+            }
           }
-          r -= SEG[i][1];
+        } else {
+          for (var i = 0; i < SEG.length; i++) {
+            if (r < SEG[i][1]) {
+              m = SEG[i][0];
+              break;
+            }
+            r -= SEG[i][1];
+          }
         }
         FACE.forEach(function (f, k) {
           if (f === m) spots.push(k);

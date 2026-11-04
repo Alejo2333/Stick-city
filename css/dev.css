@@ -1,0 +1,184 @@
+#dev-tools {
+  /* Sits left of the .fab column and stops above the minimap. */
+  --dev-max-h: calc(100vh - 190px);
+  position: fixed;
+  z-index: 20;
+  top: max(10px, env(safe-area-inset-top));
+  right: calc(66px + env(safe-area-inset-right, 0px));
+  width: fit-content;
+  max-width: calc(100vw - 20px);
+  overflow: hidden;
+  color: #e6eaee;
+  background: rgba(15, 23, 42, 0.94);
+  border: 1px solid rgba(147, 197, 253, 0.7);
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.38);
+  color-scheme: dark;
+  font: 14px/1.35 "Trebuchet MS", Verdana, sans-serif;
+}
+#dev-tools[open] {
+  width: min(300px, calc(100vw - 20px));
+}
+#dev-tools summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 12px;
+  color: #bfdbfe;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+#dev-tools summary::-webkit-details-marker {
+  display: none;
+}
+#dev-tools summary::after {
+  content: "+";
+}
+#dev-tools[open] summary::after {
+  content: "–";
+}
+#dev-tools .dev-body {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(var(--dev-max-h) - 40px);
+}
+#dev-tools .dev-tabs {
+  display: grid;
+  flex: none;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid rgba(147, 197, 253, 0.35);
+  border-bottom: 1px solid rgba(147, 197, 253, 0.35);
+}
+#dev-tools .dev-tabs button {
+  padding: 8px 2px;
+  color: #93a4bd;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  font-size: 12px;
+}
+#dev-tools .dev-tabs button:hover {
+  color: #e6eaee;
+  background: rgba(147, 197, 253, 0.12);
+}
+#dev-tools .dev-tabs button.on {
+  color: #bfdbfe;
+  background: rgba(147, 197, 253, 0.12);
+  border-bottom-color: #93c5fd;
+  font-weight: 700;
+}
+#dev-tools .dev-panes {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+#dev-tools .dev-pane {
+  display: grid;
+  gap: 12px;
+  padding: 10px 12px;
+}
+#dev-tools .dev-pane[hidden] {
+  display: none;
+}
+#dev-tools .dev-section {
+  display: grid;
+  gap: 6px;
+}
+#dev-tools .dev-section h3 {
+  margin: 0;
+  color: #93a4bd;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+#dev-tools .dev-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+#dev-tools .dev-buttons {
+  display: grid;
+  gap: 6px;
+}
+#dev-tools button,
+#dev-tools input,
+#dev-tools select {
+  min-width: 0;
+  padding: 6px 8px;
+  color: #e6eaee;
+  background: rgba(148, 163, 184, 0.16);
+  border: 1px solid rgba(147, 197, 253, 0.4);
+  border-radius: 7px;
+  font: inherit;
+  font-size: 12px;
+}
+#dev-tools input,
+#dev-tools select {
+  width: 100%;
+  box-sizing: border-box;
+}
+#dev-tools button {
+  cursor: pointer;
+}
+#dev-tools button:hover {
+  background: rgba(148, 163, 184, 0.3);
+}
+#dev-tools button.primary {
+  color: #102044;
+  background: #dbeafe;
+  border-color: #93c5fd;
+  font-weight: 700;
+}
+#dev-tools button.primary:hover {
+  background: #fff;
+}
+#dev-tools input.bad {
+  border-color: #f87171;
+  box-shadow: 0 0 0 1px #f87171;
+}
+#dev-tools summary:focus-visible,
+#dev-tools button:focus-visible,
+#dev-tools input:focus-visible,
+#dev-tools select:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+}
+#dev-tools .dev-status {
+  flex: none;
+  min-height: 1.35em;
+  margin: 0;
+  padding: 7px 12px;
+  color: #bbf7d0;
+  background: rgba(0, 0, 0, 0.22);
+  border-top: 1px solid rgba(147, 197, 253, 0.35);
+  font-size: 12px;
+}
+#dev-tools .dev-status.bad {
+  color: #fecaca;
+}
+@media (max-width: 560px) {
+  /* Below the HUD and clear of the .fab column and minimap. */
+  #dev-tools {
+    --dev-max-h: 55vh;
+    top: calc(84px + env(safe-area-inset-top, 0px));
+    right: auto;
+    left: max(8px, env(safe-area-inset-left));
+  }
+  #dev-tools[open] {
+    width: min(300px, calc(100vw - 66px));
+  }
+  #dev-tools button,
+  #dev-tools input,
+  #dev-tools select {
+    min-height: 38px;
+    font-size: 16px;
+  }
+  #dev-tools .dev-tabs button {
+    padding: 11px 2px;
+    font-size: 13px;
+  }
+}
