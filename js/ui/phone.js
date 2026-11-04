@@ -628,6 +628,7 @@ function phRestoreScroll(snapshot) {
 }
 function phone() {
   if (!phn.hidden) return;
+  if (document.activeElement) document.activeElement.blur();
   paused = true;
   keys = {};
   held = {};
@@ -646,6 +647,8 @@ function phClose() {
   cityHubFromPhone = false;
   paused = false;
   save();
+  // The phone can spend money, so refresh what a building's menu can afford.
+  if (S.in) render();
 }
 var cityHubFromPhone = false,
   cityBackTo = null,

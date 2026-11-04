@@ -1,10 +1,10 @@
 Stick City
 A browser-based open-world life simulation game built with HTML, CSS, and vanilla JavaScript.
 Features
+
 - Explore the city and interact with characters
 - Work, earn money, and buy homes, vehicles, and items
 - Complete missions and unlock achievements
-- Use an in-game phone, including a link to the developer's GitHub
 - Create a life from birth and age up one year with each in-game day, building relationships, education, a career, assets, and a legacy
 - Review one combined daily life report with market headlines, business and rental income, bank interest, investment gains or losses, stat changes, and a price graph for each stock or coin you own
 - Keep old saves by continuing at their current age; family history and achievements are stored separately from the active save
@@ -12,8 +12,8 @@ Features
 - Use the StickMatch dating app (18+) to meet adult matches, date them, become partners, and start a family
 - Track your whole portfolio in the Investments phone app, with profit and loss on every holding, and buy or sell any amount
 - Save progress locally
-How to Play
-Download or clone the repository and open index.html in a browser. No installation required.
+  How to Play
+  Download or clone the repository and open index.html in a browser. No installation required.
 
 Development
 Open `index.dev.html` to use the development tools. It has controls for editing player stats, changing stock/crypto prices and volatility, adjusting casino odds and payouts, advancing a day, triggering world and age-eligible life events, setting age and life stats, advancing one day of life, and returning to spawn. Dev settings, saves, and legacy life records use separate local storage from production; open `index.html` for the normal game.
@@ -69,6 +69,7 @@ js/
 ```
 
 Where to add things
+
 - A new casino game: add a function in `js/city/casino.js` built on `casinoScreen` and `casinoRound`, then add a button for it in `casinoFloor`. Styles go in `css/casino.css`.
 - A new Life Hub screen: write it with `cityScreen` in the matching `js/city/` file and add a button in `cityHub` (`js/city/hub.js`).
 - New items, vehicles, achievements or story chapters: add entries to the lists in `js/data/lifesim.js`.

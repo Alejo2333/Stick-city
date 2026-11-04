@@ -313,7 +313,7 @@ body.in .joy {
   padding: 0;
   font-size: 22px;
 }
-body.in .fab {
+body.in .fab button:not(#phb) {
   display: none;
 }
 /* Sits apart from the stack, along the bottom edge and clear of the joystick. */
