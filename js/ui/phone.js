@@ -485,14 +485,14 @@ function phRender() {
       var k = a[0],
         px = S.px[k],
         o = S.hold[k] || 0,
-        ch = S.pp[k] ? Math.round((px / S.pp[k] - 1) * 100) : 0;
+        ch = pxChange(k);
       h +=
         '<div class="card"><b>' +
         a[1] +
         " " +
         a[2] +
         "</b><br>$" +
-        px +
+        fmtPx(px) +
         ' <span class="' +
         (ch >= 0 ? "up" : "dn") +
         '">' +
@@ -500,6 +500,7 @@ function phRender() {
         Math.abs(ch) +
         "%</span> · own " +
         o +
+        priceChart(k) +
         '<div class="rw">' +
         pb("buy", k + ":1", "Buy 1", "g", S.cash < px) +
         pb("buy", k + ":5", "Buy 5", "g", S.cash < px * 5) +

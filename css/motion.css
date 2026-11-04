@@ -17,7 +17,10 @@
   .cz-stage *,
   .fab-bump,
   .ph-page,
-  .ph {
+  .ph,
+  .rp,
+  .rp-meter i,
+  .rp .pc-plot svg {
     animation: none;
   }
   .screen .menu button,

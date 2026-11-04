@@ -549,95 +549,78 @@ function lifeShowEvent(event, after) {
   });
 }
 function lifeYearSummary(days, report) {
-  if (report) report.end = dayFinanceSnapshot();
   var event = lifePickEvent(),
     cutoffDay = S.day - days,
     highlights = S.life.feed
       .filter(function (entry) {
         return (
           entry.day > cutoffDay &&
+          entry.text !== overnightMsg &&
           ["city", "family", "finance"].indexOf(entry.type) >= 0
         );
       })
       .map(function (entry) {
         return entry.text;
-      }),
-    lines = [
-      "Day " +
-        S.day +
-        " · Turning age " +
-        S.age +
-        " · " +
-        S.weather +
-        " · " +
-        seasonName() +
-        ".",
-      S.life.name +
-        " is now " +
-        S.age +
-        " — " +
-        lifeLabel(S.life.stage) +
-        ".",
-      "Happiness " +
-        Math.round(S.hap) +
-        " · Health " +
-        Math.round(S.life.health) +
-        " · Smarts " +
-        Math.round(S.int) +
-        " · Looks " +
-        Math.round(S.life.looks) +
-        ".",
-    ].concat(daySummaryLines(report));
-  if (highlights.length)
-    lines.push(
-        "During the year: " +
-          highlights.slice(-6).join(" "),
-    );
-  if (overnightMsg) lines.push(overnightMsg);
+      })
+      .slice(-6),
+    facts = [];
   if (S.life.school.years)
-    lines.push(
-      "School progress: grade " +
+    facts.push([
+      "🎓 School",
+      "Grade " +
         (S.life.school.grade || 1) +
         " · GPA " +
-        Number(S.life.school.gpa || 2).toFixed(1) +
-        ".",
-    );
+        Number(S.life.school.gpa || 2).toFixed(1),
+    ]);
   if (S.life.job)
-    lines.push(
-      "Work: " +
-        S.life.job +
+    facts.push([
+      "💼 Work",
+      S.life.job +
         " · level " +
         (S.life.jobLevel + 1) +
         " · " +
         S.life.jobShifts +
-        " shifts completed.",
-    );
-  if (S.life.pension) lines.push("Retirement pension: $" + S.life.pension + "/year.");
+        " shifts",
+    ]);
+  if (S.life.pension)
+    facts.push(["🧓 Pension", "$" + S.life.pension + "/year"]);
   if (S.life.children.length)
-    lines.push(
-      "Family: " +
-        S.life.children
-          .map(function (p) {
-            return p.name + " (age " + p.age + ")";
-          })
-          .join(", ") +
-        ".",
-    );
+    facts.push([
+      "👪 Family",
+      S.life.children
+        .map(function (p) {
+          return p.name + " (" + p.age + ")";
+        })
+        .join(", "),
+    ]);
   if (S.life.illnesses.length)
-    lines.push("Health note: " + S.life.illnesses.join(", ") + ".");
+    facts.push(["🩺 Health", S.life.illnesses.join(", ")]);
   if (S.life.habits.length)
-    lines.push("Wellbeing note: " + S.life.habits.join(", ") + ".");
-  if (event) lines.push("A life event is ready: " + event.title + ".");
-  lines.push("Net worth: $" + Math.round(netWorth()).toLocaleString() + ".");
-  mshow("📊 Day " + S.day + " · Age " + S.age + " Report", lines, function (d) {
-    appendInvestmentPanels(d);
-    if (event)
-      mbtn(d, "✨", "Choose today's life event", function () {
-        lifeShowEvent(event);
-      });
-    mbtn(d, "📰", "Read the life feed", lifeFeedScreen);
-    mbtn(d, "▶", "Return to the city", closeMenu);
-  });
+    facts.push(["🌱 Wellbeing", S.life.habits.join(", ")]);
+  if (event) facts.push(["✨ Coming up", event.title]);
+  mshow(
+    "📊 Day " + S.day + " report",
+    [
+      reportNode(report, {
+        life: true,
+        tags: [
+          S.life.name + " · Age " + S.age + " · " + lifeLabel(S.life.stage),
+          (WEATHER_ICON[S.weather] || "🌤") + " " + S.weather,
+          seasonName(),
+        ],
+        highlights: highlights,
+        facts: facts,
+      }),
+    ],
+    function (d) {
+      if (event)
+        mbtn(d, "✨", "Choose today's life event", function () {
+          lifeShowEvent(event);
+        });
+      mbtn(d, "📰", "Read the life feed", lifeFeedScreen);
+      mbtn(d, "▶", "Return to the city", closeMenu);
+    },
+  );
 }
 function lifeAgeUp() {
   lifeInit();
@@ -1902,7 +1885,6 @@ function lifeEndScreen() {
   if (!S.life.endRecord) S.life.endRecord = lifeRunRecord("unknown");
   var record = S.life.endRecord,
     report = currentLifeDayReport;
-  if (report) report.end = dayFinanceSnapshot();
   paused = true;
   onTitle = true;
   keys = {};
@@ -1923,9 +1905,9 @@ function lifeEndScreen() {
       record.children.length
         ? "Your family can carry on your story."
         : "Your story has been added to the city graveyard.",
-    ].concat(report ? daySummaryLines(report) : []),
+      reportNode(report, { life: true, ended: true, chartsOnly: !report }),
+    ],
     function (d) {
-      appendInvestmentPanels(d);
       if (record.children.length)
         mbtn(d, "🌳", "Continue as " + record.children[0].name, function () {
           lifePrepareNext(record.children[0]);

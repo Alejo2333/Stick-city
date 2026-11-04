@@ -76,6 +76,7 @@ function mshow(title, lines, build) {
   var copy = document.createElement("div");
   copy.className = "screen-copy";
   lines.forEach(function (l) {
+    if (typeof l !== "string") return copy.appendChild(l);
     var q = document.createElement("p");
     q.textContent = l;
     copy.appendChild(q);

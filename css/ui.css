@@ -642,34 +642,413 @@
 .screen p.life-feed-entry {
   text-align: left;
 }
-.investment-grid {
-  display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
-  gap: 8px;
-  margin: 4px 0;
+/* Daily report */
+.screen-panel:has(.rp) {
+  width: min(760px, 100%);
+  padding-bottom: 0;
+  scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+  scrollbar-width: thin;
 }
-.investment-panel {
+.screen-panel:has(.rp) h1 {
+  font-size: clamp(30px, 6vw, 46px);
+  margin-bottom: 6px;
+}
+.screen-panel:has(.rp) .menu {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: 8px;
+  width: auto;
+  margin: 0 calc(-1 * clamp(18px, 4vw, 30px));
+  padding: 10px clamp(18px, 4vw, 30px) 14px;
+  background: #0a1330;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+.screen-panel:has(.rp) .menu button {
+  padding: 6px 10px;
+  gap: 8px;
+  font-size: 14px;
+  animation: none;
+}
+.screen-panel:has(.rp) .menu .ico {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-size: 18px;
+}
+@media (min-width: 560px) {
+  .screen-panel:has(.rp) .menu button {
+    grid-column: auto;
+  }
+}
+/* Short landscape phones can't spare the room for pinned buttons. */
+@media (max-height: 480px) {
+  .screen-panel:has(.rp) .menu {
+    position: static;
+  }
+}
+/* Keep toasts clear of the report's pinned buttons. */
+body:has(.screen:not([hidden]) .rp) #log {
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  bottom: auto;
+}
+.rp {
+  --rp-up: #4ee0c0;
+  --rp-dn: #ff8f6b;
   display: grid;
+  gap: 10px;
   min-width: 0;
-  gap: 3px;
-  padding: 8px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 12px;
-  background: rgba(5, 15, 42, 0.52);
   color: #fff;
+  text-align: left;
+  animation: sc-fade 0.4s ease both;
+}
+.rp .up {
+  color: var(--rp-up);
+}
+.rp .dn {
+  color: var(--rp-dn);
+}
+.rp-label {
+  color: rgba(255, 255, 255, 0.72);
   font-size: 12px;
+  font-weight: 500;
+}
+.rp-delta {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.rp-tags,
+.rp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.rp-tags {
+  justify-content: center;
+}
+.rp-chip {
+  padding: 3px 10px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 12px;
+  font-weight: 500;
+}
+.rp-hero {
+  display: grid;
+  justify-items: center;
+  padding: 4px 0;
+}
+.rp-hero b {
+  font-size: clamp(36px, 8vw, 52px);
+  font-weight: 600;
+  line-height: 1.1;
+}
+.rp-hero .rp-delta {
+  font-size: 14px;
+}
+.rp-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.rp-tile,
+.rp-card {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  background: rgba(5, 15, 42, 0.55);
+}
+.rp-tile {
+  display: grid;
+  gap: 1px;
+  align-content: start;
+}
+.rp-tile b {
+  font-size: clamp(16px, 4vw, 21px);
+  font-weight: 600;
+}
+.rp-tile .rp-delta {
+  font-size: 12px;
+}
+.rp-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 10px;
+}
+.rp-card h2 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.rp-card ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  line-height: 1.35;
   overflow-wrap: anywhere;
 }
-.investment-panel span {
-  color: rgba(255, 255, 255, 0.78);
+.rp-money li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.rp-money .rp-delta {
+  font-variant-numeric: tabular-nums;
+}
+.rp-stat {
+  margin-bottom: 8px;
+}
+.rp-stat-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 3px;
+  font-size: 13px;
+}
+.rp-stat-value {
+  display: flex;
+  gap: 6px;
+}
+.rp-stat-value b {
+  font-weight: 600;
+}
+.rp-meter {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.rp-meter i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transform-origin: left;
+  animation: rp-grow 0.6s ease-out 0.1s both;
+}
+@keyframes rp-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+.rp-facts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 13px;
+}
+.rp-facts dt {
+  color: rgba(255, 255, 255, 0.72);
+}
+.rp-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.rp-holdings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+  gap: 14px 18px;
+}
+.rp-holding {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.rp-holding-head,
+.rp-holding-sub {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.rp-holding-head {
+  font-size: 13px;
+}
+.rp-holding-head b {
+  font-weight: 600;
+}
+.rp-holding-sub {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+}
+/* Price charts, in the report and on the phone */
+.pc {
+  --pc-up: #4ee0c0;
+  --pc-dn: #ff8f6b;
+  --pc-text: #fff;
+  --pc-muted: rgba(255, 255, 255, 0.72);
+  --pc-grid: rgba(255, 255, 255, 0.14);
+  --pc-surface: #0c1736;
+  --pc-h: 72px;
+  --pc-line: var(--pc-up);
+  margin-top: 6px;
   font-size: 11px;
 }
-.investment-panel svg {
+.pc.dn {
+  --pc-line: var(--pc-dn);
+}
+.card .pc {
+  --pc-up: #0d8f78;
+  --pc-dn: #d2502a;
+  --pc-text: #1b2430;
+  --pc-muted: #5f6b78;
+  --pc-grid: rgba(27, 36, 48, 0.14);
+  --pc-surface: #fff;
+  --pc-h: 56px;
+  margin-bottom: 4px;
+  font-size: 10px;
+}
+.pc-empty {
+  padding: 10px 0;
+  color: var(--pc-muted);
+}
+.pc-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 8px;
+}
+.pc-plot {
+  position: relative;
+  height: var(--pc-h);
+  border-radius: 4px;
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+.pc-plot:focus {
+  outline: none;
+}
+.pc-plot:focus-visible {
+  outline: 2px solid var(--pc-text);
+  outline-offset: 3px;
+}
+.pc-plot svg {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
-  height: 54px;
+  height: 100%;
   overflow: visible;
+  pointer-events: none;
+}
+.rp .pc-plot svg {
+  animation: pc-reveal 0.7s ease-out 0.15s both;
+}
+@keyframes pc-reveal {
+  from {
+    clip-path: inset(-10% 100% -10% 0);
+  }
+  to {
+    clip-path: inset(-10% -2% -10% 0);
+  }
+}
+.pc-plot polyline {
+  fill: none;
+  stroke: var(--pc-line);
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.pc-plot polygon {
+  fill: var(--pc-line);
+  opacity: 0.12;
+}
+.pc-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--pc-grid);
+  pointer-events: none;
+}
+.pc-dot,
+.pc-mark {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pc-line);
+  box-shadow: 0 0 0 2px var(--pc-surface);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.pc-cross {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--pc-muted);
+  pointer-events: none;
+}
+.pc-mark,
+.pc-cross,
+.pc-tip {
+  display: none;
+}
+.pc-on .pc-mark,
+.pc-on .pc-cross,
+.pc-on .pc-tip {
+  display: block;
+}
+.pc-on .pc-dot {
+  opacity: 0.35;
+}
+.pc-tip {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  z-index: 2;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  color: #0d2257;
+  font-size: 11px;
+  line-height: 1.25;
+  text-align: center;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.card .pc-tip {
+  background: #1b2430;
+  color: #fff;
+}
+.pc-tip b,
+.pc-tip span {
+  display: block;
+}
+.pc-tip b {
+  font-size: 13px;
+  font-weight: 700;
+}
+.pc-y {
+  position: relative;
+  min-width: 42px;
+  color: var(--pc-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.pc-y-label {
+  display: block;
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+.pc-x {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 3px;
+  color: var(--pc-muted);
+}
+.pc-x b {
+  color: var(--pc-line);
+  font-weight: 600;
 }
 .creator-result {
   position: sticky;

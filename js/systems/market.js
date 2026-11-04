@@ -134,6 +134,7 @@ function priceTick() {
     S.px[k] = next;
   });
   newsTick();
+  moonTick();
 
   AS.forEach(function (a) {
     var k = a[0];
@@ -334,6 +335,30 @@ function newsTick() {
       applyNews(a, e);
     }
   }
+}
+
+// Rare overnight jumps of +300% to +500%. The pull toward base price in
+// priceTick bleeds them back off, so holders get a few days to sell.
+var MOON_ODDS = { stock: 0.006, crypto: 0.015 };
+var MOON_NEWS = [
+  "{n} skyrockets overnight",
+  "Buying frenzy sends {n} to the moon",
+  "Short squeeze rockets {n}",
+  "Nobody can explain the {n} surge",
+];
+function moonTick() {
+  AS.forEach(function (a) {
+    if (Math.random() >= (a[3] ? MOON_ODDS.crypto : MOON_ODDS.stock)) return;
+    var before = S.px[a[0]];
+    setPx(a[0], rand(4, 6));
+    S.news.push(
+      "🚀 " +
+        pick(MOON_NEWS).replace("{n}", a[2]) +
+        " (+" +
+        Math.round((S.px[a[0]] / before - 1) * 100) +
+        "%)",
+    );
+  });
 }
 
 if (typeof PA !== "undefined") {

@@ -40,6 +40,7 @@ js/
   core/effects.js     sound, floating text, screen feedback, night tint
   ui/backpack.js      backpack screen, message toast
   systems/market.js   stocks, prices, news
+  ui/report.js        daily report screen and price charts
   ui/phone.js         phone apps, email, messages
   ui/creator.js       StickTube, StickStream and StickTok phone apps
   world/pickups.js    cash and gem pickups

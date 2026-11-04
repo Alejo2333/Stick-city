@@ -186,6 +186,7 @@ function cityNewDay() {
     S.lifetimeRent += rent;
     msgs.push("Rental income: " + fmtCash(rent) + ".");
   }
+  var moneyMsgs = msgs.length;
   if (S.day % 7 === 0)
     msgs.push(
       "🎪 Seasonal city festival! Visit the Cafe for the community fair.",
@@ -213,11 +214,8 @@ function cityNewDay() {
   S.daily = { day: S.day, work: 0, talk: 0, explore: 0 };
   if (S.driving && !S.vehicle) S.driving = false;
   overnightMsg = msgs.join(" ");
-  if (overnightMsg) {
-    say(overnightMsg);
-    addLog(overnightMsg);
-  }
-  return { business: income, rent: rent, notices: msgs.slice() };
+  if (overnightMsg) addLog(overnightMsg);
+  return { business: income, rent: rent, notices: msgs.slice(moneyMsgs) };
 }
 function cityReward(id) {
   var m = MISSIONS.filter(function (q) {
