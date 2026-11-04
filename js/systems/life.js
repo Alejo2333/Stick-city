@@ -548,24 +548,36 @@ function lifeShowEvent(event, after) {
     });
   });
 }
-function lifeYearSummary(days) {
+function lifeYearSummary(days, report) {
+  if (report) report.end = dayFinanceSnapshot();
   var event = lifePickEvent(),
     cutoffDay = S.day - days,
     highlights = S.life.feed
       .filter(function (entry) {
-        return entry.day > cutoffDay && entry.type === "city";
+        return (
+          entry.day > cutoffDay &&
+          ["city", "family", "finance"].indexOf(entry.type) >= 0
+        );
       })
       .map(function (entry) {
         return entry.text;
       }),
     lines = [
+      "Day " +
+        S.day +
+        " · Turning age " +
+        S.age +
+        " · " +
+        S.weather +
+        " · " +
+        seasonName() +
+        ".",
       S.life.name +
         " is now " +
         S.age +
         " — " +
         lifeLabel(S.life.stage) +
         ".",
-      "Calendar advanced " + days + " days.",
       "Happiness " +
         Math.round(S.hap) +
         " · Health " +
@@ -575,12 +587,13 @@ function lifeYearSummary(days) {
         " · Looks " +
         Math.round(S.life.looks) +
         ".",
-    ];
+    ].concat(daySummaryLines(report));
   if (highlights.length)
     lines.push(
         "During the year: " +
-          highlights.slice(-4).join(" "),
+          highlights.slice(-6).join(" "),
     );
+  if (overnightMsg) lines.push(overnightMsg);
   if (S.life.school.years)
     lines.push(
       "School progress: grade " +
@@ -616,9 +629,10 @@ function lifeYearSummary(days) {
     lines.push("Wellbeing note: " + S.life.habits.join(", ") + ".");
   if (event) lines.push("A life event is ready: " + event.title + ".");
   lines.push("Net worth: $" + Math.round(netWorth()).toLocaleString() + ".");
-  mshow("🎂 Year " + S.age + " · Annual summary", lines, function (d) {
+  mshow("📊 Day " + S.day + " · Age " + S.age + " Report", lines, function (d) {
+    appendInvestmentPanels(d);
     if (event)
-      mbtn(d, "✨", "Choose this year's life event", function () {
+      mbtn(d, "✨", "Choose today's life event", function () {
         lifeShowEvent(event);
       });
     mbtn(d, "📰", "Read the life feed", lifeFeedScreen);
@@ -635,12 +649,7 @@ function lifeAgeUp() {
     say("This life has ended.");
     return;
   }
-  var days = 30 - (S.day % 30);
-  if (days < 1 || days > 30) days = 30;
-  for (var i = 0; i < days; i++) newDay({ suppressEvents: true });
-  // The skipped days' weather and news notes would be out of date by now.
-  say("");
-  birthday({ ageUp: true, days: days });
+  newDay();
 }
 function lifeOnBirthday(options) {
   lifeInit();
@@ -841,7 +850,8 @@ function lifeOnBirthday(options) {
     "summary",
   );
   save();
-  lifeYearSummary(options && options.days ? options.days : 30);
+  lifeYearSummary(options && options.days ? options.days : 1, options && options.report);
+  currentLifeDayReport = null;
 }
 function lifeFeedScreen() {
   lifeInit();
@@ -1890,7 +1900,9 @@ function lifeDeath(reason) {
 function lifeEndScreen() {
   // Saves that ended before endRecord existed rebuild it without re-archiving.
   if (!S.life.endRecord) S.life.endRecord = lifeRunRecord("unknown");
-  var record = S.life.endRecord;
+  var record = S.life.endRecord,
+    report = currentLifeDayReport;
+  if (report) report.end = dayFinanceSnapshot();
   paused = true;
   onTitle = true;
   keys = {};
@@ -1911,8 +1923,9 @@ function lifeEndScreen() {
       record.children.length
         ? "Your family can carry on your story."
         : "Your story has been added to the city graveyard.",
-    ],
+    ].concat(report ? daySummaryLines(report) : []),
     function (d) {
+      appendInvestmentPanels(d);
       if (record.children.length)
         mbtn(d, "🌳", "Continue as " + record.children[0].name, function () {
           lifePrepareNext(record.children[0]);
@@ -1924,6 +1937,7 @@ function lifeEndScreen() {
       });
     },
   );
+  currentLifeDayReport = null;
 }
 function lifePrepareNext(child) {
   var inheritance = Math.min(5000, Math.max(0, Math.floor(netWorth() * 0.25)));
@@ -2126,9 +2140,7 @@ function lifeHubScreen() {
       lifeLabel(lifeStage(S.age)) +
       " · age " +
       S.age +
-      " · " +
-      (30 - (S.day % 30)) +
-      " day(s) to next birthday.",
+      " · ages up one year each day.",
     function (d) {
       lifeProgressNode(d, "Happiness", lifeBarValue(S.hap), 100, "#f59e0b");
       lifeProgressNode(d, "Health", lifeBarValue(S.life.health), 100, "#e34f4f");
@@ -2137,7 +2149,7 @@ function lifeHubScreen() {
       mbtn(
         d,
         "🎂",
-        "Age Up · next birthday",
+        "Advance 1 day · age +1",
         lifeAgeUp,
       );
       mbtn(d, "📊", "Full life stats", lifeStatsScreen);

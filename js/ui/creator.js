@@ -35,7 +35,8 @@ var CR_CAP = 20000000,
     ["music", "Music"],
   ],
   CR_DRAFT = null,
-  CR_WELCOME = "";
+  CR_WELCOME = "",
+  CR_TROLL_OPEN = false;
 
 // [label, hours, energy cost, base followers, viral chance, strike chance, niche]
 var CRP = {
@@ -338,13 +339,6 @@ phRender = function () {
         '<div class="card creator-alert creator-strike" role="status"><b>⚠️ Community strike: ' +
         d.st +
         "/3</b><br>Another strike may temporarily suspend this account.</div>";
-    if (d.pend) {
-      h +=
-        '<div class="card creator-alert creator-troll" role="alert"><b>🧌 Troll alert</b><br>A troll is attacking your comments. Choose how to respond.</div>' +
-        pb("crtroll", pv + ":ign", "Ignore the troll") +
-        pb("crtroll", pv + ":blk", "Block the troll", "g") +
-        pb("crtroll", pv + ":clap", "Clap back (risky)", "r");
-    }
     if (sus > 0) {
       h +=
         '<div class="card creator-alert creator-suspension" role="alert"><b>🚫 Account suspended</b><br>Posting and monetization are paused for ' +
@@ -412,6 +406,37 @@ phRender = function () {
     h +
     '</div><div class="phh" data-a="home"><i></i></div>';
   phRestoreScroll(scroll);
+  if (d.pend && !phn.hidden) crShowTroll(pv);
+};
+function crShowTroll(k) {
+  if (CR_TROLL_OPEN || !S.cr[k] || !S.cr[k].pend) return;
+  CR_TROLL_OPEN = true;
+  phn.hidden = true;
+  paused = true;
+  onTitle = true;
+  keys = {};
+  held = {};
+  bp.hidden = true;
+  mshow(
+    "🧌 Troll alert",
+    ["A troll is attacking your comments. How will you respond?"],
+    function (d) {
+      [
+        ["Ignore the troll", "ign"],
+        ["Block the troll", "blk"],
+        ["Clap back (risky)", "clap"],
+      ].forEach(function (choice) {
+        mbtn(d, "▶", choice[0], function () {
+          crResolveTroll(k, choice[1]);
+          closeMenu();
+          CR_TROLL_OPEN = false;
+          phone();
+          pv = k;
+          phRender();
+        });
+      });
+    },
+  );
 };
 PA.crjoin = function (k) {
   crInit();
@@ -587,18 +612,21 @@ PA.crpost = function (v) {
 };
 
 PA.crtroll = function (v) {
+  var p = v.split(":");
+  crResolveTroll(p[0], p[1]);
+};
+function crResolveTroll(k, action) {
   crInit();
-  var p = v.split(":"),
-    d = S.cr[p[0]];
+  var d = S.cr[k];
   if (!d || !d.pend) return;
   d.pend = 0;
-  if (p[1] === "ign") {
+  if (action === "ign") {
     hp(-2);
     pmsg = "You scrolled past it. It still stung.";
-  } else if (p[1] === "blk") {
+  } else if (action === "blk") {
     hp(-1);
     pmsg = "Blocked. Problem solved.";
-  } else if (p[1] === "clap" && Math.random() < 0.5) {
+  } else if (action === "clap" && Math.random() < 0.5) {
     var g = Math.floor(d.f * 0.03) + 5;
     d.f += g;
     hp(4);
@@ -606,9 +634,9 @@ PA.crtroll = function (v) {
       "Your comeback got screenshotted everywhere! +" +
       crN(g) +
       " " +
-      PLAT[p[0]].unit +
+      PLAT[k].unit +
       ".";
-  } else if (p[1] === "clap") {
+  } else if (action === "clap") {
     var l = Math.floor(d.f * 0.02);
     d.f = Math.max(0, d.f - l);
     hp(-5);
@@ -616,11 +644,11 @@ PA.crtroll = function (v) {
       "Your reply backfired. −" +
       crN(l) +
       " " +
-      PLAT[p[0]].unit +
+      PLAT[k].unit +
       ".";
   }
   save();
-};
+}
 
 PA.crspon = function (k) {
   crInit();

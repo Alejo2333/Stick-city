@@ -5,14 +5,15 @@ Features
 - Work, earn money, and buy homes, vehicles, and items
 - Complete missions and unlock achievements
 - Use an in-game phone, including a link to the developer's GitHub
-- Create a life from birth, age up through the 30-day birthday cycle, and build relationships, education, a career, assets, and a legacy
+- Create a life from birth and age up one year with each in-game day, building relationships, education, a career, assets, and a legacy
+- Review one combined daily life report with market headlines, business and rental income, bank interest, investment gains or losses, stat changes, and a price graph for each stock or coin you own
 - Keep old saves by continuing at their current age; family history and achievements are stored separately from the active save
 - Save progress locally
 How to Play
 Download or clone the repository and open index.html in a browser. No installation required.
 
 Development
-Open `index.dev.html` to use the development tools. It has controls for editing player stats, changing stock/crypto prices and volatility, adjusting casino odds and payouts, advancing a day, triggering world and age-eligible life events, setting age and life stats, skipping to the next birthday, and returning to spawn. Dev settings, saves, and legacy life records use separate local storage from production; open `index.html` for the normal game.
+Open `index.dev.html` to use the development tools. It has controls for editing player stats, changing stock/crypto prices and volatility, adjusting casino odds and payouts, advancing a day, triggering world and age-eligible life events, setting age and life stats, advancing one day of life, and returning to spawn. Dev settings, saves, and legacy life records use separate local storage from production; open `index.html` for the normal game.
 
 The dev page is not access-controlled. Exclude `index.dev.html`, `js/dev.js`, and `css/dev.css` from any public production deployment.
 
@@ -65,7 +66,7 @@ Where to add things
 - A new Life Hub screen: write it with `cityScreen` in the matching `js/city/` file and add a button in `cityHub` (`js/city/hub.js`).
 - New items, vehicles, achievements or story chapters: add entries to the lists in `js/data/lifesim.js`.
 - Life events, careers, and cartoonish justice scenarios: add entries to the data lists in `js/data/lifesim.js`. New life events should define an age-stage or an `ok()` eligibility check when needed.
-- The Life Hub app opens the life simulator. `Age Up` processes normal day systems through the next 30-day birthday, then shows a yearly summary and at most one eligible life event.
+- The Life Hub app opens the life simulator. Each in-game day adds one year of age and shows one combined life and financial report, including price graphs for owned investments, followed by at most one eligible life event. No separate birthday celebration is shown.
 - Completed lives, family records, legacy achievements, and challenge selection use separate browser storage so starting a new game does not erase them.
 - Creator apps: extend StickTube, StickStream or StickTok in `js/ui/creator.js`; their progress and profiles are stored in `S.cr`.
 - A new JS file: add a `<script src>` line to `index.html` after every file it uses at load time.

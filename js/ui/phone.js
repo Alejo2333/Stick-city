@@ -350,7 +350,7 @@ function phRender() {
         : '<div style="margin-top:5px">Start a life story at birth, or continue an older save.</div>') +
       "</div></div>" +
       [
-        ["life", "🌱 Life story & Age Up"],
+        ["life", "🌱 Life story & Age"],
         ["story", "📖 Story chapters"],
         ["missions", "🎯 Missions & rewards"],
         ["daily", "📅 Daily challenges"],

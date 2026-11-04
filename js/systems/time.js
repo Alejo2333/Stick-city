@@ -1,11 +1,227 @@
+function dayFinanceSnapshot() {
+  var holdings = {};
+  AS.forEach(function (asset) {
+    var shares = S.hold[asset[0]] || 0;
+    if (shares) holdings[asset[0]] = shares * (S.px[asset[0]] || 0);
+  });
+  return {
+    cash: S.cash,
+    bank: S.bank,
+    hap: S.hap,
+    en: S.en,
+    str: S.str,
+    int: S.int,
+    cha: S.cha,
+    looks: S.life && S.life.created ? S.life.looks : null,
+    health: S.life && S.life.created ? S.life.health : null,
+    portfolio: invested(),
+    holdings: holdings,
+  };
+}
+function daySummaryLines(report) {
+  if (!report || !report.start || !report.end) return [];
+  var start = report.start,
+    end = report.end,
+    lines = [],
+    business = report.business || 0,
+    rent = report.rent || 0,
+    interest = end.bank - start.bank,
+    marketDelta = end.portfolio - start.portfolio,
+    keys = Object.keys(end.holdings || {});
+  if (business)
+    lines.push("Business revenue: +$" + business.toLocaleString() + ".");
+  if (rent) lines.push("Rental income: +$" + rent.toLocaleString() + ".");
+  if (interest)
+    lines.push("Bank interest: +$" + interest.toLocaleString() + ".");
+  if (report.news && report.news.length)
+    lines.push("Market news: " + report.news.join(" · "));
+  if (keys.length) {
+    lines.push(
+      "Investments: $" +
+        Math.round(end.portfolio).toLocaleString() +
+        " (" +
+        (marketDelta >= 0 ? "+" : "−") +
+        "$" +
+        Math.abs(Math.round(marketDelta)).toLocaleString() +
+        ").",
+    );
+    keys
+      .map(function (key) {
+        return {
+          key: key,
+          delta:
+            (end.holdings[key] || 0) -
+            (start.holdings[key] || 0),
+        };
+      })
+      .filter(function (holding) {
+        return holding.delta;
+      })
+      .sort(function (a, b) {
+        return Math.abs(b.delta) - Math.abs(a.delta);
+      })
+      .slice(0, 4)
+      .forEach(function (holding) {
+        var asset = AS.filter(function (item) {
+          return item[0] === holding.key;
+        })[0];
+        if (asset)
+          lines.push(
+            asset[2] +
+              ": " +
+              (holding.delta >= 0 ? "+" : "−") +
+              "$" +
+              Math.abs(Math.round(holding.delta)).toLocaleString() +
+              ".",
+          );
+      });
+  }
+  var statChanges = [];
+  [
+    ["Happiness", "hap"],
+    ["Energy", "en"],
+    ["Strength", "str"],
+    ["Smarts", "int"],
+    ["Charisma", "cha"],
+    ["Health", "health"],
+    ["Looks", "looks"],
+  ].forEach(function (stat) {
+    if (
+      start[stat[1]] === null ||
+      end[stat[1]] === null ||
+      start[stat[1]] === end[stat[1]]
+    )
+      return;
+    var delta = end[stat[1]] - start[stat[1]];
+    statChanges.push(stat[0] + " " + (delta > 0 ? "+" : "") + delta);
+  });
+  lines.push(
+    "Cash $" +
+      Math.round(end.cash).toLocaleString() +
+      " · Bank $" +
+      Math.round(end.bank).toLocaleString() +
+      (statChanges.length ? " · " + statChanges.join(" · ") : "") +
+      ".",
+  );
+  return lines;
+}
+var currentLifeDayReport = null;
+function appendInvestmentPanels(container) {
+  var holdings = AS.filter(function (asset) {
+      return (S.hold[asset[0]] || 0) > 0;
+    }),
+    grid;
+  if (!holdings.length) return;
+  grid = document.createElement("section");
+  grid.className = "investment-grid";
+  grid.setAttribute("aria-label", "Your investment price charts");
+  holdings.forEach(function (asset) {
+    var key = asset[0],
+      history = S.marketHistory && S.marketHistory[key],
+      prices = Array.isArray(history)
+        ? history.map(function (point) {
+            return Number(point.price);
+          }).filter(Number.isFinite)
+        : [],
+      panel = document.createElement("article"),
+      title = document.createElement("b"),
+      detail = document.createElement("span"),
+      svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"),
+      values = prices.length ? prices : [S.px[key]],
+      min = Math.min.apply(Math, values),
+      max = Math.max.apply(Math, values),
+      spread = max - min || 1,
+      points = values.map(function (price, index) {
+        return (
+          (values.length > 1 ? (index / (values.length - 1)) * 280 : 140) +
+          "," +
+          (58 - ((price - min) / spread) * 48)
+        );
+      });
+    panel.className = "investment-panel";
+    title.textContent = asset[1] + " " + asset[2] + " (" + key + ")";
+    detail.textContent =
+      (S.hold[key] || 0) +
+      " units · $" +
+      fmtPx(S.px[key]) +
+      " each · value $" +
+      fmtPx((S.hold[key] || 0) * S.px[key]);
+    svg.setAttribute("viewBox", "0 0 280 64");
+    svg.setAttribute("role", "img");
+    svg.setAttribute(
+      "aria-label",
+      asset[2] + " price history over " + values.length + " days",
+    );
+    svg.setAttribute("preserveAspectRatio", "none");
+    var line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+    line.setAttribute("points", points.join(" "));
+    line.setAttribute("fill", "none");
+    line.setAttribute("stroke", "#65d6a5");
+    line.setAttribute("stroke-width", "3");
+    line.setAttribute("stroke-linecap", "round");
+    line.setAttribute("stroke-linejoin", "round");
+    svg.appendChild(line);
+    if (points.length === 1) {
+      var dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      dot.setAttribute("cx", points[0].split(",")[0]);
+      dot.setAttribute("cy", points[0].split(",")[1]);
+      dot.setAttribute("r", "4");
+      dot.setAttribute("fill", "#65d6a5");
+      svg.appendChild(dot);
+    }
+    panel.appendChild(title);
+    panel.appendChild(detail);
+    panel.appendChild(svg);
+    grid.appendChild(panel);
+  });
+  container.appendChild(grid);
+}
+function showDaySummary(report, after) {
+  report.end = dayFinanceSnapshot();
+  var lines = [
+    "Day " +
+      S.day +
+      " · Turning age " +
+      (S.age + 1) +
+      " · " +
+      S.weather +
+      " · " +
+      seasonName() +
+      ".",
+  ].concat(daySummaryLines(report));
+  if (overnightMsg) lines.push(overnightMsg);
+  if (lines.length === 1) lines.push("A quiet day in Stick City.");
+  paused = true;
+  onTitle = true;
+  keys = {};
+  held = {};
+  bp.hidden = true;
+  phn.hidden = true;
+  mshow("📊 Daily city report", lines, function (d) {
+    appendInvestmentPanels(d);
+    mbtn(d, "▶", "Continue", function () {
+      closeMenu();
+      if (after) after();
+    });
+  });
+}
 function newDay(options) {
   options = options || {};
+  var before = dayFinanceSnapshot();
   S.day++;
   S.t = 6;
   S.bank = Math.floor(S.bank * 1.002);
-  cityNewDay();
+  var cityReport = cityNewDay();
   priceTick();
   genDrops();
+  var report = {
+    start: before,
+    end: dayFinanceSnapshot(),
+    business: cityReport ? cityReport.business : 0,
+    rent: cityReport ? cityReport.rent : 0,
+    days: 1,
+    news: Array.isArray(S.news) ? S.news.slice() : [],
+  };
   if (S.day % 7 === 0) {
     sendEmail(
       "weekly-" + S.day,
@@ -28,15 +244,16 @@ function newDay(options) {
   }
   if (options.suppressEvents) return;
   hudDayT = HUD_DAY;
-  if (S.day % 30 === 0) {
-    setTimeout(function () {
-      birthday();
-    }, 0);
-  } else {
-    setTimeout(function () {
-      showRandomEvent("📅 A new day");
-    }, 0);
-  }
+  setTimeout(function () {
+    if (S.life && S.life.created && typeof lifeOnBirthday === "function") {
+      currentLifeDayReport = report;
+      birthday({ days: 1, report: report });
+    } else {
+      showDaySummary(report, function () {
+        birthday({ days: 1 });
+      });
+    }
+  }, 0);
 }
 function adv(h) {
   S.t += h;

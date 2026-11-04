@@ -12,21 +12,65 @@ var AS = [
     ["MON", "🚀", "MoonRock", 1, 0.4, 2],
   ],
   phMsg = "";
+
+var MIN_PRICE = 0.25;
+
+function r2(x) {
+  return Math.round(x * 100) / 100;
+}
+function fmtPx(x) {
+  return r2(x).toFixed(2);
+}
+
 AS.forEach(function (a) {
-  if (!S.px[a[0]])
-    S.px[a[0]] = Math.max(1, Math.round(a[5] * (0.6 + Math.random())));
+  if (!S.px[a[0]]) S.px[a[0]] = r2(Math.max(1, a[5] * (0.6 + Math.random())));
 });
+if (!S.marketHistory || typeof S.marketHistory !== "object")
+  S.marketHistory = {};
+AS.forEach(function (asset) {
+  var history = S.marketHistory[asset[0]];
+  if (!Array.isArray(history)) S.marketHistory[asset[0]] = [];
+  else
+    S.marketHistory[asset[0]] = history
+      .filter(function (point) {
+        return (
+          point &&
+          Number.isFinite(Number(point.day)) &&
+          Number.isFinite(Number(point.price)) &&
+          Number(point.price) > 0
+        );
+      })
+      .slice(-30);
+});
+function recordMarketHistory() {
+  AS.forEach(function (asset) {
+    var key = asset[0],
+      history = S.marketHistory[key],
+      point = { day: S.day, price: S.px[key] };
+    if (history.length && history[history.length - 1].day === S.day)
+      history[history.length - 1] = point;
+    else history.push(point);
+    if (history.length > 30) history.shift();
+  });
+}
 function rand(lo, hi) {
   return lo + Math.random() * (hi - lo);
 }
+
+function pxChange(k) {
+  var prev = S.pp && S.pp[k];
+  return prev ? Math.round((S.px[k] / prev - 1) * 1000) / 10 : 0;
+}
 function setPx(k, multiplier) {
-  S.px[k] = Math.max(1, Math.round(S.px[k] * multiplier));
+  S.px[k] = r2(Math.max(MIN_PRICE, S.px[k] * multiplier));
 }
 function invested() {
-  return AS.reduce(function (total, asset) {
-    var k = asset[0];
-    return total + (S.hold[k] || 0) * (S.px[k] || 0);
-  }, 0);
+  return r2(
+    AS.reduce(function (total, asset) {
+      var k = asset[0];
+      return total + (S.hold[k] || 0) * (S.px[k] || 0);
+    }, 0),
+  );
 }
 function buy(k, q) {
   if (
@@ -35,16 +79,17 @@ function buy(k, q) {
     })
   )
     return false;
-  var px = S.px[k];
+  var px = S.px[k],
+    cost = r2(px * q);
   if (
     !Number.isInteger(q) ||
     q < 1 ||
     !Number.isFinite(px) ||
-    px < 1 ||
-    S.cash < px * q
+    px <= 0 ||
+    S.cash < cost
   )
     return false;
-  S.cash -= px * q;
+  S.cash = r2(S.cash - cost);
   S.hold[k] = (S.hold[k] || 0) + q;
   return true;
 }
@@ -56,8 +101,8 @@ function sellAll(k) {
   )
     return { shares: 0, proceeds: 0 };
   var shares = S.hold[k] || 0,
-    proceeds = shares * (S.px[k] || 0);
-  S.cash += proceeds;
+    proceeds = r2(shares * (S.px[k] || 0));
+  S.cash = r2(S.cash + proceeds);
   S.hold[k] = 0;
   return { shares: shares, proceeds: proceeds };
 }
@@ -65,20 +110,39 @@ function priceTick() {
   S.pp = {};
   AS.forEach(function (a) {
     var k = a[0],
+      old = S.px[k],
       r =
         (Math.random() - 0.5) * 2 * a[4] * (0.4 + Math.random() * 1.6) +
         trend(k) +
-        // Pull toward the base price, or random drift sinks everything to $1.
-        0.06 * Math.log(a[5] / S.px[k]);
-    S.pp[k] = S.px[k];
+
+        0.06 * Math.log(a[5] / old);
+
     if (a[3] && a[4] >= 0.2) {
       var q = Math.random();
       if (q < 0.03) r = -0.5;
       else if (q > 0.97 && a[4] >= 0.3) r = 0.8;
     }
-    S.px[k] = Math.max(1, Math.round(S.px[k] * (1 + r)));
+
+
+    if (Math.abs(r) < 0.004) r = (r < 0 ? -1 : 1) * rand(0.004, 0.012);
+
+    S.pp[k] = old;
+    var next = r2(Math.max(MIN_PRICE, old * (1 + r)));
+
+    if (next === old)
+      next = r2(old + (old <= MIN_PRICE || r > 0 ? 0.01 : -0.01));
+    S.px[k] = next;
   });
   newsTick();
+
+  AS.forEach(function (a) {
+    var k = a[0];
+    if (S.px[k] === S.pp[k])
+      S.px[k] = r2(
+        S.px[k] + (S.px[k] <= MIN_PRICE || Math.random() < 0.5 ? 0.01 : -0.01),
+      );
+  });
+  recordMarketHistory();
 }
 function trend(k) {
   S.tr[k] = (S.tr[k] || 0) * 0.7 + (Math.random() - 0.5) * 0.03;
@@ -262,7 +326,6 @@ function newsTick() {
       } else {
         var sec = SECTOR[a[0]];
         var sectorPool = good ? NEWS_SECTOR_UP[sec] : NEWS_SECTOR_DN[sec];
-        // 40% chance of a sector-specific story, otherwise generic
         e =
           sectorPool && Math.random() < 0.4
             ? pick(sectorPool)
@@ -271,4 +334,22 @@ function newsTick() {
       applyNews(a, e);
     }
   }
+}
+
+if (typeof PA !== "undefined") {
+  PA.buy = function (v) {
+    var p = v.split(":"),
+      k = p[0],
+      px = S.px[k],
+      q = p[1] === "max" ? Math.floor(S.cash / px) : +p[1];
+    if (q < 1 || !buy(k, q)) {
+      pmsg = "Not enough cash.";
+      return;
+    }
+    pmsg = "Bought " + q + ".";
+  };
+  PA.sell = function (k) {
+    var r = sellAll(k);
+    pmsg = "Sold for $" + fmtPx(r.proceeds) + ".";
+  };
 }

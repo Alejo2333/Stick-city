@@ -37,6 +37,7 @@ var S = {
   px: {},
   tr: {},
   news: [],
+  marketHistory: {},
   pp: {},
   hold: {},
   th: {},

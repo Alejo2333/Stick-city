@@ -1056,5 +1056,5 @@ function birthday(options) {
     return lifeOnBirthday(options || {});
   if (S.age >= 60 && Math.random() < (S.age - 58) * 0.04) return die();
   if (S.hap < 20) S.en = Math.max(0, S.en - 5);
-  showRandomEvent("🎂 Happy birthday! Age " + S.age);
+  showRandomEvent("📅 A new day · Age " + S.age);
 }

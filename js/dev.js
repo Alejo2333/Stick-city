@@ -570,13 +570,13 @@ if (DEV_MODE) {
     S.life.looks = looks;
     devSave("Life health and looks updated.");
   });
-  devButton(devLifeActions, "Skip to next birthday", function () {
+  devButton(devLifeActions, "Advance one day (age +1)", function () {
     if (!S.life.created) {
       devStatusSet("Initialize the current save before aging it up.", true);
       return;
     }
     lifeAgeUp();
-    devStatusSet("Processed days through the next birthday.");
+    devStatusSet("Advanced one day and aged up one year.");
   }, true);
   devButton(devLifeActions, "Trigger selected life event", function () {
     if (!S.life.created) {

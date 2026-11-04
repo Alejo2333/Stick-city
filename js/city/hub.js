@@ -217,6 +217,7 @@ function cityNewDay() {
     say(overnightMsg);
     addLog(overnightMsg);
   }
+  return { business: income, rent: rent, notices: msgs.slice() };
 }
 function cityReward(id) {
   var m = MISSIONS.filter(function (q) {
@@ -271,7 +272,7 @@ function cityHub() {
       fmtCash(S.cash),
     function (d) {
       mbtn(d, "📖", "Story chapters", cityStory);
-      mbtn(d, "🌱", "Life story & Age Up", lifeHubScreen);
+      mbtn(d, "🌱", "Life story & Age", lifeHubScreen);
       mbtn(d, "🎯", "Missions & rewards", cityMissions);
       mbtn(d, "📅", "Daily challenges", cityDaily);
       mbtn(d, "🧭", "Choose life path", cityCareer);
