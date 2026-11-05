@@ -110,6 +110,7 @@ function closeMenu() {
   mn.hidden = true;
   cityHubFromPhone = false;
   cityBackTo = null;
+  cityBackLife = null;
   paused = false;
   onTitle = false;
 }

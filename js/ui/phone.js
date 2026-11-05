@@ -277,7 +277,7 @@ function phRender() {
     h = "",
     t = hhmm(),
     n = pmsg ? '<div class="card note">' + esc(pmsg) + "</div>" : "";
-  el.className = "phs" + (pv === "home" ? " home" : "");
+  el.className = "phs" + (pv === "home" ? " home" : pv === "date" ? " sm" : "");
   function hd(ti, back) {
     return (
       '<div class="pht">' +
@@ -319,7 +319,7 @@ function phRender() {
       }).join("") +
       "</div>";
   } else if (pv === "date") {
-    h = hd("💘 StickMatch") + datingPage();
+    h = datingPage();
   } else if (pv === "inv") {
     h = hd("💼 Investments") + investPage();
   } else if (pv === "invd") {
@@ -652,6 +652,7 @@ function phClose() {
 }
 var cityHubFromPhone = false,
   cityBackTo = null,
+  cityBackLife = null, // screens opened from Life Story return to it
   CITY_ITEMS = [
     "Browse shop",
     "Property listings",

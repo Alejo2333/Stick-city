@@ -16,14 +16,14 @@ function player(x, y, mv) {
   g.rotate(S.face);
   if (S.driving && S.vehicle) {
     g.fillStyle =
-      ["car", "sportscar"].indexOf(S.vehicle) >= 0
+      CAR_KEYS.indexOf(S.vehicle) >= 0
         ? "#e8b024"
         : ["scooter", "motorcycle"].indexOf(S.vehicle) >= 0
           ? "#ff5b50"
           : "#e3e3e3";
     g.strokeStyle = "#222";
     g.lineWidth = 3;
-    if (S.vehicle === "car" || S.vehicle === "sportscar") {
+    if (CAR_KEYS.indexOf(S.vehicle) >= 0) {
       g.fillRect(-30, -31, 67, 62);
       g.strokeRect(-30, -31, 67, 62);
       g.fillStyle = "#a7dcf6";

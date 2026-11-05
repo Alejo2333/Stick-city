@@ -1,5 +1,8 @@
 var LIFE_KEY = DEV_MODE ? "stickCityDevLegacy1" : "stickCityLegacy1",
-  LIFE_NEXT_KEY = DEV_MODE ? "stickCityDevNextLife1" : "stickCityNextLife1";
+  LIFE_NEXT_KEY = DEV_MODE ? "stickCityDevNextLife1" : "stickCityNextLife1",
+  LIFE_STORY_YEARS = 12,
+  lifeQuickYear = false,
+  lifeLastReport = null;
 
 function lifeInit() {
   if (!S.life || typeof S.life !== "object") S.life = {};
@@ -45,6 +48,12 @@ function lifeInit() {
     });
   }
   if (!l.mortgages || typeof l.mortgages !== "object") l.mortgages = {};
+  if (!l.eventSeen || typeof l.eventSeen !== "object") l.eventSeen = {};
+  if (!Array.isArray(l.owned)) l.owned = [];
+  if (!Number.isFinite(l.ownedNext)) l.ownedNext = 0;
+  if (!l.licenses || typeof l.licenses !== "object") l.licenses = {};
+  if (!l.subs || typeof l.subs !== "object") l.subs = {};
+  if (!l.serviceYears || typeof l.serviceYears !== "object") l.serviceYears = {};
   if (!Number.isFinite(l.petCount)) l.petCount = 0;
   if (!Number.isFinite(l.lifeCount)) l.lifeCount = 1;
   if (!Number.isFinite(l.year)) l.year = 0;
@@ -471,9 +480,12 @@ function lifeContinueLegacy() {
 function lifeEventEligible(event) {
   if (!event || !Array.isArray(event.choices) || !event.choices.length)
     return false;
+  // Behind bars, only prison events happen, and they happen nowhere else.
+  if (!!event.prison !== S.life.prisonYears > 0) return false;
+  if (!event.choices.some(lifeEventAffordable)) return false;
   if (event.stage && event.stage !== "any" && event.stage !== S.life.stage)
     return false;
-  if (event.once && S.life.flags[event.once || event.id]) return false;
+  if (event.once && S.life.flags["once:" + event.id]) return false;
   if (event.followup && S.life.flags["seen:" + event.followup]) return false;
   if (typeof event.ok === "function") {
     try {
@@ -488,7 +500,18 @@ function lifeEventEligible(event) {
 function lifePickEvent() {
   var events = LIFE_EVENTS.filter(lifeEventEligible);
   if (!events.length) return null;
-  return events[Math.floor(Math.random() * events.length)];
+  // Least-seen events come first, so a life sees everything before repeats.
+  var seen = S.life.eventSeen,
+    fewest = Math.min.apply(
+      null,
+      events.map(function (event) {
+        return seen[event.id] || 0;
+      }),
+    ),
+    fresh = events.filter(function (event) {
+      return (seen[event.id] || 0) === fewest;
+    });
+  return fresh[Math.floor(Math.random() * fresh.length)];
 }
 function lifeApplyEventEffect(effect) {
   effect = effect || {};
@@ -497,6 +520,7 @@ function lifeApplyEventEffect(effect) {
     S.life.health = lifeBarValue(S.life.health + effect.health);
   if (effect.smarts) S.int = lifeBarValue(S.int + effect.smarts);
   if (effect.charisma) S.cha += effect.charisma;
+  if (effect.strength) S.str += effect.strength;
   if (effect.looks) S.life.looks = lifeBarValue(S.life.looks + effect.looks);
   if (effect.cash) {
     S.cash += effect.cash < 0 ? Math.max(effect.cash, -S.cash) : effect.cash;
@@ -510,6 +534,38 @@ function lifeApplyEventEffect(effect) {
   }
   if (effect.flag) S.life.flags[effect.flag] = 1;
 }
+function lifeEventWords(text) {
+  return String(text || "").replace(/\{partner\}/g, S.partner || "your partner");
+}
+function lifeStatValue(stat) {
+  return {
+    smarts: S.int,
+    charisma: S.cha,
+    strength: S.str,
+    looks: S.life.looks,
+    health: S.life.health,
+    happiness: S.hap,
+    karma: S.k * 2,
+  }[stat];
+}
+// Picks what happens. A stat of 50 is neutral; 0 or 100 shifts the odds by 25%.
+function lifeEventOutcome(event, choice, index) {
+  if (!choice.outcomes) return choice;
+  return withFate("event:" + S.day + ":" + event.id + ":" + index, function () {
+    for (var i = 0; i < choice.outcomes.length; i++) {
+      var outcome = choice.outcomes[i];
+      if (outcome.chance === undefined) return outcome;
+      var odds = outcome.chance;
+      if (outcome.stat)
+        odds += (Math.min(100, Math.max(0, lifeStatValue(outcome.stat))) - 50) / 200;
+      if (Math.random() < Math.max(0.05, Math.min(0.95, odds))) return outcome;
+    }
+    return choice.outcomes[choice.outcomes.length - 1];
+  });
+}
+function lifeEventAffordable(choice) {
+  return !(choice.effect && choice.effect.cash < 0 && S.cash < -choice.effect.cash);
+}
 function lifeShowEvent(event, after) {
   if (!event) {
     say("No age-appropriate life events are available this year.");
@@ -521,35 +577,69 @@ function lifeShowEvent(event, after) {
   keys = {};
   held = {};
   bp.hidden = true;
-  mshow("📖 " + event.title, ["A moment in your life has arrived."], function (d) {
-    event.choices.forEach(function (choice) {
-      mbtn(d, "▶", choice.label, function () {
-        try {
-          lifeApplyEventEffect(choice.effect);
-          if (event.once) S.life.flags[event.once || event.id] = 1;
-          if (event.followup)
-            S.life.flags["seen:" + event.followup] = 1;
-          lifeNote(
-            event.title + ": " + choice.label + ".",
-            "event",
-          );
-          save();
-          closeMenu();
-          if (after) after();
-        } catch (error) {
-          console.error("Life event choice failed:", event.id, choice.label, error);
-          closeMenu();
-          say(
-            "That life choice could not be completed: " +
-              (error && error.message ? error.message : String(error)),
-          );
-        }
+  S.life.eventSeen[event.id] = (S.life.eventSeen[event.id] || 0) + 1;
+  mshow(
+    "📖 " + event.title,
+    [lifeEventWords(event.text) || "A moment in your life has arrived."],
+    function (d) {
+      event.choices.forEach(function (choice, index) {
+        kitMenuItem(d, {
+          icon: "▶",
+          title: choice.label,
+          detail: lifeEventAffordable(choice) ? "" : "Needs " + fmtCash(-choice.effect.cash),
+          disabled: !lifeEventAffordable(choice),
+          onClick: function () {
+            lifeEventChoose(event, choice, index, after);
+          },
+        });
+      });
+    },
+  );
+}
+function lifeEventChoose(event, choice, index, after) {
+  try {
+    var outcome = lifeEventOutcome(event, choice, index),
+      cashBefore = S.cash,
+      effect = outcome.effect || {};
+    lifeApplyEventEffect(effect);
+    if (outcome.act) outcome.act();
+    if (event.once) S.life.flags["once:" + event.id] = 1;
+    if (event.followup) S.life.flags["seen:" + event.followup] = 1;
+    var result = lifeEventWords(outcome.result) || event.title + ": " + choice.label + ".",
+      deltas = shopDeltas(effect),
+      cashChange = S.cash - cashBefore;
+    if (cashChange)
+      deltas.push({
+        text: (cashChange > 0 ? "+" : "-") + fmtCash(Math.abs(cashChange)),
+        good: cashChange > 0,
+      });
+    lifeNote(result, "event");
+    sfx(
+      deltas.some(function (delta) {
+        return !delta.good;
+      })
+        ? "spend"
+        : "up",
+    );
+    save();
+    mshow("📖 " + event.title, [result], function (d) {
+      if (deltas.length) d.appendChild(kitNode(kitDeltas(deltas)));
+      mbtn(d, "▶", "Continue", function () {
+        closeMenu();
+        if (after) after();
       });
     });
-  });
+  } catch (error) {
+    console.error("Life event choice failed:", event.id, choice.label, error);
+    closeMenu();
+    say(
+      "That life choice could not be completed: " +
+        (error && error.message ? error.message : String(error)),
+    );
+  }
 }
-function lifeYearSummary(days, report) {
-  var event = lifePickEvent(),
+function lifeYearSummary(days, report, viewOnly) {
+  var event = viewOnly ? null : lifePickEvent(),
     cutoffDay = S.day - days,
     highlights = S.life.feed
       .filter(function (entry) {
@@ -618,7 +708,8 @@ function lifeYearSummary(days, report) {
           lifeShowEvent(event);
         });
       rewindButton(d);
-      mbtn(d, "📰", "Read the life feed", lifeFeedScreen);
+      if (viewOnly) mbtn(d, "⬅️", "Back to Life Story", lifeHubScreen);
+      else mbtn(d, "📰", "Read the life feed", lifeFeedScreen);
       mbtn(d, "▶", "Return to the city", closeMenu);
     },
   );
@@ -633,10 +724,13 @@ function lifeAgeUp() {
     say("This life has ended.");
     return;
   }
+  lifeQuickYear = true;
   newDay();
 }
 function lifeOnBirthday(options) {
   lifeInit();
+  var quickYear = lifeQuickYear;
+  lifeQuickYear = false;
   S.life.year++;
   S.life.stage = lifeStage(S.age);
   var oldStage = lifeStage(Math.max(0, S.age - 1));
@@ -733,6 +827,7 @@ function lifeOnBirthday(options) {
       "finance",
     );
   }
+  lifeShopYear();
   if (S.life.illnesses.length && Math.random() < 0.65) {
     S.life.health = lifeBarValue(S.life.health - 8);
     lifeRecord("An untreated illness affected health this year.", "health");
@@ -835,7 +930,19 @@ function lifeOnBirthday(options) {
     "summary",
   );
   save();
-  lifeYearSummary(options && options.days ? options.days : 1, options && options.report);
+  lifeLastReport = (options && options.report) || null;
+  if (quickYear) {
+    // The Next year button skips the report and goes straight to the story.
+    var fromPhone = cityHubFromPhone,
+      event = lifePickEvent();
+    lifeHubScreen();
+    if (event)
+      lifeShowEvent(event, function () {
+        cityHubFromPhone = fromPhone;
+        lifeHubScreen();
+      });
+  } else
+    lifeYearSummary(options && options.days ? options.days : 1, options && options.report);
   currentLifeDayReport = null;
 }
 function lifeFeedScreen() {
@@ -962,12 +1069,14 @@ function lifePersonScreen(id) {
       (person.role === "pet"
         ? [
             ["🎾", "Play together", 4, 0],
-            ["🦴", "Give a treat ($5)", 3, 5],
+            ["🦴", "Give a treat ($6)", 3, 6],
           ]
         : [
             ["💬", "Talk", 2, 0],
             ["🕰️", "Spend time together", 4, 0],
-            ["🌷", "Give a small gift ($15)", 5, 15],
+            ["🌷", "Give a small gift ($18)", 5, 18],
+            ["🎁", "Give a nice gift ($120)", 10, 120],
+            ["💎", "Give a lavish gift ($1,200)", 25, 1200],
             ["💵", "Ask for help", 1, 0],
             ["🗯️", "Argue", -6, 0],
             ["💐", "Compliment", 3, 0],
@@ -1019,11 +1128,7 @@ function lifePersonScreen(id) {
           save();
           lifePersonScreen(person.id);
         });
-        if (
-          action[1] === "Give a small gift ($15)" ||
-          action[1] === "Give a treat ($5)"
-        )
-          b.disabled = S.cash < action[3];
+        if (action[3]) b.disabled = S.cash < action[3];
       });
       var adultPair =
           S.age >= 18 &&
@@ -1075,11 +1180,11 @@ function lifePersonScreen(id) {
           });
         }
         if (S.life.flags.married) {
-          mbtn(d, "👶", "Adopt a child ($200)", function () {
+          mbtn(d, "👶", "Adopt a child ($240)", function () {
             lifeAdoptChild(person.name);
             save();
             lifePersonScreen(person.id);
-          }).disabled = S.cash < 200;
+          }).disabled = S.cash < 240;
         }
         mbtn(d, "💔", "Separate amicably", function () {
           S.partner = "";
@@ -1136,8 +1241,8 @@ function lifeAddChild(partnerName) {
   return child;
 }
 function lifeAdoptChild(partnerName) {
-  if (S.age < 18 || S.cash < 200) return false;
-  S.cash -= 200;
+  if (S.age < 18 || S.cash < 240) return false;
+  S.cash -= 240;
   var child = lifeAddChild(partnerName);
   lifeNote("Welcomed " + child.name + " into the family by adoption.", "family");
   return child;
@@ -1421,18 +1526,18 @@ function lifeActivitiesScreen() {
     "Choose healthy, non-graphic activities. Some take time, cost money, or carry a small risk.",
     function (d) {
       [
-        ["🏋️", "Gym workout · $10", 10, 0],
+        ["🏋️", "Gym workout · $12", 12, 0],
         ["📚", "Library visit · free", 0, 1],
-        ["🩺", "Visit the doctor · $40", 40, 2],
+        ["🩺", "Visit the doctor · $48", 48, 2],
         ["🧘", "Meditate · free", 0, 3],
-        ["🏖️", "Take a vacation · $120", 120, 4],
-        ["✨", "Try a style refresh · $80", 80, 5],
-        ["🎟️", "Enter a free city raffle · $5", 5, 6],
-        ["🎵", "Go to a music night · $25", 25, 7],
-        ["🧶", "Practice a hobby · $10", 10, 8],
-        ["🐾", "Adopt a pet · $60", 60, 9],
-        ["💎", "Buy jewelry · $100", 100, 10],
-        ["🛡️", "Insure owned assets · $30", 30, 11],
+        ["🏖️", "Take a vacation · $145", 145, 4],
+        ["✨", "Try a style refresh · $95", 95, 5],
+        ["🎟️", "Enter the city raffle · $6", 6, 6],
+        ["🎵", "Go to a music night · $30", 30, 7],
+        ["🧶", "Practice a hobby · $12", 12, 8],
+        ["🐾", "Adopt a pet · $72", 72, 9],
+        ["💎", "Shop for jewelry", 0, 10],
+        ["🛡️", "Insure owned assets · $36", 36, 11],
       ].forEach(function (item, index) {
         var eligible = S.age >= minimumAge[index],
           affordable = S.cash >= item[2],
@@ -1459,13 +1564,14 @@ function lifeActivitiesScreen() {
   );
 }
 function lifeDoActivity(kind) {
-  var costs = [10, 0, 40, 0, 120, 80, 5, 25, 10, 60, 100, 30],
+  var costs = [12, 0, 48, 0, 145, 95, 6, 30, 12, 72, 0, 36],
     minimumAge = [12, 3, 0, 8, 0, 18, 18, 18, 3, 18, 18, 18],
     cost = costs[kind];
   if (S.age < (minimumAge[kind] || 0)) {
     say("This activity is available from age " + minimumAge[kind] + ".");
     return;
   }
+  if (kind === 10) return lifeShopScreen("jewelry");
   if (!Number.isFinite(cost) || !citySpend(cost)) return;
   switch (kind) {
     case 0:
@@ -1547,11 +1653,6 @@ function lifeDoActivity(kind) {
       hp(5);
       lifeNote("Adopted " + pet.name + " from the city shelter.", "family");
       break;
-    case 10:
-      S.life.assets.jewelry =
-        (S.life.assets.jewelry || 0) + Math.round(cost * 1.25);
-      lifeNote("Bought a keepsake piece of jewelry.", "finance");
-      break;
     case 11:
       S.life.assets.insuredUntil = S.life.year + 1;
       lifeNote("Insured your home and belongings for the year.", "finance");
@@ -1564,9 +1665,9 @@ function lifeDoActivity(kind) {
 function lifeAssetsScreen() {
   lifeInit();
   var worth = Math.round(netWorth()),
-    apartmentValue = Math.round(700 * (1 - lifeHomeWear("apartment"))),
-    townhouseValue = Math.round(1700 * (1 - lifeHomeWear("townhouse"))),
-    mansionValue = Math.round(3000 * (1 - lifeHomeWear("mansion"))),
+    apartmentValue = Math.round(850 * (1 - lifeHomeWear("apartment"))),
+    townhouseValue = Math.round(2050 * (1 - lifeHomeWear("townhouse"))),
+    mansionValue = Math.round(3600 * (1 - lifeHomeWear("mansion"))),
     vehicles = [],
     mortgageTotal = Object.keys(S.life.mortgages).reduce(function (total, key) {
       return total + S.life.mortgages[key];
@@ -1588,46 +1689,107 @@ function lifeAssetsScreen() {
       Math.round(S.life.assets.jewelry || 0).toLocaleString() +
       ".",
     function (d) {
-      if (S.owns.apartment)
-        mbtn(d, "🏢", "Apartment · estimated value $" + apartmentValue, function () {});
-      if (S.owns.townhouse)
-        mbtn(d, "🏘️", "Townhouse · estimated value $" + townhouseValue, function () {});
-      if (S.mansion)
-        mbtn(d, "🏰", "Mansion · estimated value $" + mansionValue, function () {});
-      vehicles.forEach(function (vehicle) {
-        mbtn(d, vehicle[4], vehicle[1] + " · owned", function () {});
+      kitMenuItem(d, {
+        icon: "🛍️",
+        title: "Marketplace",
+        detail: "Homes, boats, aircraft, collectibles and more",
+        onClick: lifeShopScreen,
       });
+      if (S.life.owned.length || vehicles.length || S.owns.apartment || S.owns.townhouse || S.mansion)
+        kitMenuHeading(d, "What you own");
+      S.life.owned.forEach(function (owned) {
+        var item = shopItem(owned.key);
+        if (!item) return;
+        kitMenuItem(d, {
+          icon: item.icon,
+          title: shopTitle(item.name),
+          detail:
+            "Worth " +
+            fmtCash(shopValue(owned)) +
+            (owned.rented ? " · rented out" : "") +
+            (item.upkeep ? " · " + fmtCash(item.upkeep) + "/yr upkeep" : ""),
+          onClick: function () {
+            lifeOwnedScreen(owned.id);
+          },
+        });
+      });
+      vehicles.forEach(function (vehicle) {
+        kitMenuItem(d, {
+          icon: vehicle[4],
+          title: vehicle[1],
+          detail: "Worth " + fmtCash(shopVehicleValue(vehicle[0])),
+          onClick: function () {
+            lifeVehicleScreen(vehicle[0]);
+          },
+        });
+      });
+      [
+        [S.owns.apartment, "🏢", "Apartment", apartmentValue],
+        [S.owns.townhouse, "🏘️", "Townhouse", townhouseValue],
+        [S.mansion, "🏰", "Mansion", mansionValue],
+      ].forEach(function (home) {
+        if (home[0])
+          kitMenuItem(d, {
+            icon: home[1],
+            title: home[2],
+            detail: "Worth " + fmtCash(home[3]) + " · tap to manage homes",
+            onClick: cityHomes,
+          });
+      });
+      if (S.life.assets.jewelry > 0)
+        kitMenuItem(d, {
+          icon: "💎",
+          title: "Older keepsake jewelry",
+          detail: "Tap to sell for " + fmtCash(S.life.assets.jewelry),
+          onClick: function () {
+            kitConfirm(
+              "Sell your older jewelry?",
+              "You'd get " + fmtCash(S.life.assets.jewelry) + ". You can't undo this.",
+              "Sell it",
+              function () {
+                S.cash += S.life.assets.jewelry;
+                S.life.assets.jewelry = 0;
+                lifeNote("Sold some older keepsake jewelry.", "finance");
+                sfx("coin");
+                save();
+                lifeAssetsScreen();
+              },
+            );
+          },
+        });
+      if (S.life.owned.length || vehicles.length || S.owns.apartment || S.owns.townhouse || S.mansion)
+        kitMenuHeading(d, "Homes and loans");
       if (!S.owns.apartment)
-        mbtn(d, "🏢", "Buy an apartment · $700", function () {
-          if (citySpend(700)) {
+        mbtn(d, "🏢", "Buy an apartment · $850", function () {
+          if (citySpend(850)) {
             S.owns.apartment = 1;
             lifeNote("Bought an apartment.", "finance");
             save();
             lifeAssetsScreen();
           }
-        }).disabled = S.cash < 700;
+        }).disabled = S.cash < 850;
       if (!S.owns.townhouse)
-        mbtn(d, "🏘️", "Buy a townhouse · $1,700", function () {
-          if (citySpend(1700)) {
+        mbtn(d, "🏘️", "Buy a townhouse · $2,050", function () {
+          if (citySpend(2050)) {
             S.owns.townhouse = 1;
             lifeNote("Bought a townhouse.", "finance");
             save();
             lifeAssetsScreen();
           }
-        }).disabled = S.cash < 1700;
+        }).disabled = S.cash < 2050;
       if (!S.mansion)
-        mbtn(d, "🏰", "Buy a mansion · $3,000", function () {
-          if (citySpend(3000)) {
+        mbtn(d, "🏰", "Buy a mansion · $3,600", function () {
+          if (citySpend(3600)) {
             S.mansion = 1;
             lifeNote("Bought a mansion.", "finance");
             save();
             lifeAssetsScreen();
           }
-        }).disabled = S.cash < 3000;
+        }).disabled = S.cash < 3600;
       [
-        ["apartment", "Apartment", 700],
-        ["townhouse", "Townhouse", 1700],
-        ["mansion", "Mansion", 3000],
+        ["apartment", "Apartment", 850],
+        ["townhouse", "Townhouse", 2050],
+        ["mansion", "Mansion", 3600],
       ].forEach(function (home) {
         var owned = home[0] === "mansion" ? S.mansion : S.owns[home[0]],
           down = Math.ceil(home[2] * 0.1);
@@ -2132,34 +2294,113 @@ function lifeHubScreen() {
     );
     return;
   }
+  cityBackLife = lifeHubScreen;
   cityScreen(
-    "🌱 Life Hub",
-    (S.life.name || "Resident") +
-      " · " +
-      lifeLabel(lifeStage(S.age)) +
-      " · age " +
+    "📖 " + (S.life.name || "Resident"),
+    "Age " +
       S.age +
-      " · ages up one year each day.",
+      " · " +
+      (S.life.prisonYears > 0 ? "In prison" : S.life.job || lifeLabel(lifeStage(S.age))) +
+      " · " +
+      fmtCash(S.cash),
     function (d) {
-      lifeProgressNode(d, "Happiness", lifeBarValue(S.hap), 100, "#f59e0b");
-      lifeProgressNode(d, "Health", lifeBarValue(S.life.health), 100, "#e34f4f");
-      lifeProgressNode(d, "Smarts", lifeBarValue(S.int), 100, "#477de8");
-      lifeProgressNode(d, "Looks", lifeBarValue(S.life.looks), 100, "#d34f9a");
-      mbtn(
-        d,
-        "🎂",
-        "Advance 1 day · age +1",
-        lifeAgeUp,
-      );
-      mbtn(d, "📊", "Full life stats", lifeStatsScreen);
-      mbtn(d, "📰", "Lifetime feed", lifeFeedScreen);
-      mbtn(d, "👥", "Relationships & family", lifePeopleScreen);
-      mbtn(d, "🎓", "School & study", lifeSchoolScreen);
-      mbtn(d, "💼", "Careers", lifeCareerScreen);
-      mbtn(d, "🎨", "Activities & wellbeing", lifeActivitiesScreen);
-      mbtn(d, "🏠", "Assets & finances", lifeAssetsScreen);
-      mbtn(d, "⚖️", "Justice & crime", lifeCrimeScreen);
-      mbtn(d, "🌳", "Legacy, family tree & goals", lifeAchievementsScreen);
+      d.appendChild(lifeStoryNode());
+      var story = d.lastChild;
+      requestAnimationFrame(function () {
+        story.scrollTop = story.scrollHeight;
+      });
+      d.appendChild(lifeStoryStats());
+      mbtn(d, "🎂", "Next year", lifeAgeUp).classList.add("ls-next");
+      if (lifeLastReport)
+        mbtn(d, "📊", "Last year's full report", function () {
+          lifeYearSummary(1, lifeLastReport, true);
+        }).classList.add("ls-report");
+      rewindButton(d);
+      var grid = document.createElement("div");
+      grid.className = "ls-grid";
+      [
+        ["🛍️", "Marketplace", lifeShopScreen, "ms-wide"],
+        ["👥", "People", lifePeopleScreen],
+        ["🎓", "School", lifeSchoolScreen],
+        ["💼", "Career", lifeCareerScreen],
+        ["🎨", "Activities", lifeActivitiesScreen],
+        ["🏠", "Assets", lifeAssetsScreen],
+        ["⚖️", "Justice", lifeCrimeScreen],
+        ["📊", "Stats", lifeStatsScreen],
+        ["📰", "Journal", lifeFeedScreen],
+        ["🌳", "Legacy", lifeAchievementsScreen],
+      ].forEach(function (item) {
+        var tile = mbtn(grid, item[0], item[1], function () {
+          item[2]();
+        });
+        if (item[3]) tile.classList.add(item[3]);
+      });
+      d.appendChild(grid);
+    },
+    function () {
+      cityBackLife = null;
+      cityHub();
     },
   );
+}
+// The last few years of this life, written out like a journal.
+function lifeStoryNode() {
+  var box = document.createElement("div"),
+    first = Math.max(0, S.age - LIFE_STORY_YEARS + 1);
+  box.className = "ls-story";
+  box.tabIndex = 0;
+  box.setAttribute("role", "log");
+  box.setAttribute("aria-label", "Your life story");
+  function addYears(from, to, lines) {
+    var heading = document.createElement("h2");
+    heading.textContent = from === to ? "Age " + from : "Ages " + from + "–" + to;
+    box.appendChild(heading);
+    lines.slice(-6).forEach(function (entry) {
+      var line = document.createElement("p");
+      line.textContent = entry.text;
+      box.appendChild(line);
+    });
+    if (!lines.length) {
+      var quiet = document.createElement("p");
+      quiet.className = "ls-quiet";
+      quiet.textContent = from === to ? "A quiet year." : "Quiet years.";
+      box.appendChild(quiet);
+    }
+  }
+  // Uneventful years in a row share one entry.
+  var quietFrom = -1;
+  for (var age = first; age <= S.age; age++) {
+    var lines = S.life.feed.filter(function (entry) {
+      return (
+        entry.age === age &&
+        ["city", "summary", "birthday", "stage"].indexOf(entry.type) < 0
+      );
+    });
+    if (!lines.length) {
+      if (quietFrom < 0) quietFrom = age;
+      continue;
+    }
+    if (quietFrom >= 0) addYears(quietFrom, age - 1, []);
+    quietFrom = -1;
+    addYears(age, age, lines);
+  }
+  if (quietFrom >= 0) addYears(quietFrom, S.age, []);
+  return box;
+}
+function lifeStoryStats() {
+  var box = document.createElement("div");
+  box.className = "ls-stats";
+  [
+    ["Happiness", S.hap, "#f5a524"],
+    ["Health", S.life.health, "#e34f4f"],
+    ["Smarts", S.int, "#5b9dff"],
+    ["Looks", S.life.looks, "#e070b5"],
+  ].forEach(function (stat) {
+    var value = lifeBarValue(stat[1]),
+      holder = document.createElement("div");
+    holder.innerHTML = kitBar(stat[0], value, 100, value < 25 ? "ls-low" : "");
+    holder.firstChild.style.setProperty("--kit-bar", stat[2]);
+    box.appendChild(holder.firstChild);
+  });
+  return box;
 }

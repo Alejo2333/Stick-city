@@ -5,9 +5,9 @@ function cityHomes() {
     function (d) {
       [
         ["starter", "Starter home", 0],
-        ["apartment", "Apartment", 700],
-        ["townhouse", "Townhouse", 1700],
-        ["mansion", "Mansion", 3000],
+        ["apartment", "Apartment", 850],
+        ["townhouse", "Townhouse", 2050],
+        ["mansion", "Mansion", 3600],
       ].forEach(function (a) {
         var owned =
           a[0] === "starter" ||
@@ -50,15 +50,15 @@ function cityBusinesses() {
     "Purchase businesses or upgrade their daily profit. Income arrives every morning.",
     function (d) {
       [
-        ["cafe", "Neighborhood cafe", 600, 28],
-        ["delivery", "Delivery service", 850, 38],
-        ["arcade", "Game arcade", 1100, 44],
-        ["store", "Corner store", 1350, 52],
-        ["factory", "Small factory", 2200, 80],
+        ["cafe", "Neighborhood cafe", 720, 28],
+        ["delivery", "Delivery service", 1020, 38],
+        ["arcade", "Game arcade", 1320, 44],
+        ["store", "Corner store", 1620, 52],
+        ["factory", "Small factory", 2640, 80],
       ].forEach(function (a) {
         var lv = S.businessUpgrades[a[0]] || 0,
           owned = !!S.businesses[a[0]],
-          price = owned ? (lv + 1) * 350 : a[2];
+          price = owned ? (lv + 1) * 420 : a[2];
         var b = mbtn(
           d,
           "💼",

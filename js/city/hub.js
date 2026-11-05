@@ -241,6 +241,7 @@ function cityScreen(title, description, builder, back) {
     mbtn(d, "⬅️", "Back", function () {
       if (ended) lifeEndScreen();
       else if (back) back();
+      else if (cityBackLife) cityBackLife();
       else if (cityBackTo) {
         var b = cityBackTo;
         closeMenu();
@@ -251,6 +252,7 @@ function cityScreen(title, description, builder, back) {
   });
 }
 function cityHub() {
+  cityBackLife = null;
   if (cityHubFromPhone) {
     mn.hidden = true;
     phn.hidden = false;

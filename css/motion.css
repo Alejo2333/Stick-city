@@ -20,8 +20,20 @@
   .ph,
   .rp,
   .rp-meter i,
-  .rp .pc-plot svg {
+  .rp .pc-plot svg,
+  .kit-deltas .kit-chip,
+  .kit-confirm,
+  .sm-celebrate h2,
+  .sm-burst i {
     animation: none;
+  }
+  .sm-ghost,
+  .sm-burst {
+    display: none;
+  }
+  .sm-top,
+  .sm-round {
+    transition: none;
   }
   .screen .menu button,
   .ov .menu button,

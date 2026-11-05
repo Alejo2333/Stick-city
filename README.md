@@ -9,8 +9,10 @@ Features
 - Review one combined daily life report with market headlines, business and rental income, bank interest, investment gains or losses, stat changes, and a price graph for each stock or coin you own
 - Keep old saves by continuing at their current age; family history and achievements are stored separately from the active save
 - Turn on Stick Citizen mode to rewind up to 7 days; the market, news, and weather replay exactly the same, so you can act on what you saw
-- Use the StickMatch dating app (18+) to meet adult matches, date them, become partners, and start a family
+- Play your life from the Life Story screen: tap Next year, read your journal, and answer the year's event
+- Use the StickMatch dating app (18+) to swipe through adult profiles, plan dates at five venues, become partners, and start a family
 - Track your whole portfolio in the Investments phone app, with profit and loss on every holding, and buy or sell any amount
+- Spend money in the Marketplace on homes, cars, boats, aircraft, jewelry, instruments, collectibles and lifestyle services, then use, rent out or sell what you own
 - Save progress locally
   How to Play
   Download or clone the repository and open index.html in a browser. No installation required.
@@ -31,6 +33,7 @@ css/
   mobile.css          touch and small-screen tweaks, zoom
   ui.css              menus, building panel, buttons, toast, phone
   casino.css          casino table animations
+  kit.css             shared UI kit, Life Story and StickMatch styles
   dev.css             development tools panel
   motion.css          reduced-motion overrides (keep last)
 js/
@@ -46,11 +49,13 @@ js/
   systems/market.js   stocks, prices, news
   ui/report.js        daily report screen and price charts
   ui/phone.js         phone apps, email, messages
+  ui/kit.js           shared UI pieces: portraits, rows, bars, chips, confirm dialog
   ui/invest.js        Investments phone app: portfolio, profit and loss, trading
   ui/creator.js       StickTube, StickStream and StickTok phone apps
   world/pickups.js    cash and gem pickups
   systems/events.js   life log, random events, death, birthdays
   data/lifesim.js     story, achievements, vehicles, shop items, furniture
+  systems/shop.js     Marketplace: buying, owning, yearly costs and selling
   systems/life.js     life creation, annual progression, relationships, school, careers, activities, justice, and legacy
   systems/dating.js   StickMatch dating app, dates, pregnancy and births
   city/social.js      story screen, shops, election, festival, neighbors
@@ -72,9 +77,18 @@ Where to add things
 
 - A new casino game: add a function in `js/city/casino.js` built on `casinoScreen` and `casinoRound`, then add a button for it in `casinoFloor`. Styles go in `css/casino.css`.
 - A new Life Hub screen: write it with `cityScreen` in the matching `js/city/` file and add a button in `cityHub` (`js/city/hub.js`).
-- New items, vehicles, achievements or story chapters: add entries to the lists in `js/data/lifesim.js`.
-- Life events, careers, and cartoonish justice scenarios: add entries to the data lists in `js/data/lifesim.js`. New life events should define an age-stage or an `ok()` eligibility check when needed.
-- The Life Hub app opens the life simulator. Each in-game day adds one year of age and shows one combined life and financial report, including price graphs for owned investments, followed by at most one eligible life event. No separate birthday celebration is shown.
+- New items, vehicles, achievements or story chapters: add entries to the lists in `js/data/lifesim.js`. Marketplace items go in `LIFE_SHOP`, and new cars also go in `CAR_KEYS`.
+- Life events, careers, and cartoonish justice scenarios: add entries to the data lists in `js/data/lifesim.js`. New life events need `text`, and each choice needs a `result`, or `outcomes` for a roll that can go either way. Set `stage`, an `ok()` check or `prison: true` as needed. Keep child and teen events free of romantic or sexual content.
+- The Life Hub app opens the Life Story screen. Each in-game day adds one year of age. The Next year button returns to the story and opens at most one eligible life event, with the full report one tap away. Sleeping in the city still shows the combined life and financial report first. No separate birthday celebration is shown.
 - Completed lives, family records, legacy achievements, and challenge selection use separate browser storage so starting a new game does not erase them.
 - Creator apps: extend StickTube, StickStream or StickTok in `js/ui/creator.js`; their progress and profiles are stored in `S.cr`.
-- A new JS file: add a `<script src>` line to `index.html` after every file it uses at load time.
+- A new JS file: add a `<script src>` line to `index.html` and `index.dev.html` after every file it uses at load time.
+
+UI direction
+
+New and updated screens should feel like a fast, text-first life sim, with Stick City's own look and writing:
+
+- One obvious main action, short readable text, and quick taps instead of long lists of identical buttons.
+- Every action shows its result, and empty, locked and can't-afford states say what to do next.
+- Works at phone width and by keyboard, with 44px touch targets, readable contrast, and animations listed in `css/motion.css` for reduced motion.
+- Reuse `js/ui/kit.js` and `css/kit.css`, with stylesheet classes rather than inline styles.
